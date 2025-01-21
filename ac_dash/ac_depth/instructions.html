@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Instructions</title>
+    <style>
+      body {
+        width: 60vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100vh;
+        margin: auto;
+        padding: 10px;
+        background: white; /* Optional: make the content pop */
+        border: 1px solid #ccc; /* Optional: border for visualization */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow */
+      }
+      @media (max-width: 768px) { /* Adjust 768px based on your breakpoint preference */
+        body {
+            width: 100vw/* Make the columns take full width */
+        }
+      }
+      <!-- .wrapper { -->
+      <!--   align-items: center; -->
+      <!-- } -->
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+
+    <h1>Sisäpuolen korkeuden mittaaminen</h1>
+
+    <p>Kammioiden sisäpuolen korkeus mitataan puolen sentin tarkkuudella viidestä kohtaa. Jokaisesta nurkasta, nimet NW/luode, SW/lounas, NE/koillinen, SE/kaakko sekä keskeltä nimellä MID. Eli viisi mittausta joka kammiosta. Muista että kammion paikasta riippuen sinua lähimpänä olevassa reunassa voi olla joko NE ja SE kulmat, tai NW ja SW. Kirjaa siis mittaukset sen mukaan.</p>
+
+    <p>Itä on puukkosuon kammioilta tietä kohti.</p>
+
+    <p>Tällä hetkellä sovellus ei vielä seuraa kammioiden sijaintia, mutta tulevaisuudessa olisi tarkoitus että lomakkeiden järjestys on aina "oikea", eli mittaajaa lähimpänä olevat mittaukset ovat lomakkeessa ensimmäisenä.</p>
+
+    <h2>Varsinainen mittaaminen</h2>
+    <p>Kammion korkeus on mitattu matka maan tai lumen pinnasta kannen alareunaan. Apuna olevassa mittauskohdistimessa on lovet joiden takia sen alapinta asettuu samaan tasoon kammion kannen alareunan kanssa. Eli aseta rullamitan pää maan / lumen pintaan ja katso mitan arvo mittauskohdistimien alapuolella. Jos kammion seinä on niin huurteessa ettei siitä näe läpi, kammion korkeus on mittauskohdistimen yläpuolella oleva näkyvä arvo - 3cm. Eli mittauskohdistimen ja kannen paksuus on 3cm.</p>
+    <p>Korkeudet mitataan millimetreinä viidestä kohtaa puolen sentin tarkkuudella. Mittaamiseen tarvitaan rullamitta ja "mittauskohdistin" jonka avulla mittauksen saa tehtyä suunnilleen samasta kohtaa joka kerta. Korkeus on rullamitan arvo näkyy rullamitassa kun katsot mittauksenkohdistimen alareunaan, mittaukset on siis parasta tehdä polvillaan. Joskus kammio on kuitenkin niin jäässä </p>
+    <p></p>
+    <h2>Nettilomake</h2>
+
+    <p>Mittausten kirjaamiseen tehty sovellus löytyy osoitteesta <a href="http://koskeen.net/ac_depth">http://koskeen.net/ac_depth</a>. Päästäksesi sivulle tarvitset käyttäjätunnuksen ja salasanan jotka saat Eerolta.</p>
+
+    <h3>Kaikille kirjauksille muistettavaa:</h3>
+    <ul>
+        <li>Päivämäärä ja aika
+            <ul>
+                <li>Input date laatikkoon tulee automaattisesti nykyinen päivämäärä kun sivu päivitetään</li>
+                <li>Muista vaihtaa jos kirjaat vanhoja mittauksia</li>
+                <li>Voit laittaa kaikille päivän mittauksille saman ajan.</li>
+            </ul>
+        </li>
+        <li>Unit / yksikkö
+            <ul>
+                <li>Oletuksena sivu odottaa mittauksia millimetreinä</li>
+                <li>Vaihtamalla Unit laatikkoon mm/cm/dm/m voit muuttaa yksikköä tarpeen mukaan</li>
+            </ul>
+        </li>
+        <li>Onko kammiossa lunta
+            <ul>
+                <li>Jos kammiossa on lunta niin Snow in chamber laatikon pitää olla tikattu päälle</li>
+                <li>näin voidaan erotella kesä- ja talviajan mittaukset.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>Voit kirjata mittauksia kahdella tapaa:</h3>
+
+    <h4>1. Sivun lomakkeet</h4>
+    <p>Jokaiselle kammiolle löytyy oma lomake johon voit kirjata mittaukset. Submit-nappia painamalla kirjaat mittauksen tietokantaan. Jos joku mittaus on jostain syystä jäänyt mittaamatta, kirjaa siihen -9999.</p>
+
+    <p>Voit pitää nettisivua auki ja kirjata mittauksia sitä mukaa kun mittaat, mutta muista että tiedot pyyhkiytyvät kun päivität sivun, eli paina Submit aina kun saat yhden kammion mitattua jotta ne menevät tietokantaan. Sinun ei tarvitse päivittää sivua joka kirjauksen jälkeen, riittää että mittauksen kellonaika on muutaman tunnin tarkkuudella.</p>
+
+    <h4>2. Ladattava tekstitiedosto</h4>
+    <p>Tätä tapaa kannattaa käyttää puhelimella, mutta sen käyttämistä varten tarvitset puhelimeesi sovelluksen jolla voit käsitellä tekstitiedostoja. Androidilla olen käyttänyt tätä <a href="https://play.google.com/store/apps/details?id=com.maxistar.textpad&hl=en">notepad-sovellusta</a>. iOS:lle en valitettavasti osaa neuvoa vaihtoehtoja. Puhelimissa oletuksena tulevilla notepad-sovelluksilla ei aina voi tallentaa tiedostoa suoraan .txt-tiedostoksi, joten linkkaamani sovellusta vastaava on usein tarpeellinen. Tämä tiedosto kuitenkin todennäköisesti oletuksena aukeaa puhelimesi notepad/notes-sovelluksella vaikket sitä pääsisikään suoraan tallentamaan, joten voit kirjata mittaukset siihen ja täyttää mittaukset myöhemmin sivun yksittäisiin lomakkeisiin.</p>
+
+    <p>Sivulla olevien lomakkeiden avulla voit kirjata mittauksesi ja päivittää ne tietokantaan painamalla vastaavaa submit-painiketta. Jos jostain syystä kirjaat vanhoja mittauksia niin muista vaihtaa <strong>Input date</strong> laatikossa oleva päiväys. Siihen tulee automaattisesti nykyinen päivämäärä ja kellonaika.</p>
+
+    <p>Mittausten kirjaaminen onnistuu myös sivulla olevien lomakkeiden avulla. Joka kammiolle löytyy viisi tekstilaatikkoa, joihin mittaukset laitetaan, ja submit-nappi, joka puskee mittaukset tietokantaan. Itse suosittelen tekstitiedoston käyttöä, mutta jos katsot tämän nettilomakkeen käytön kätevämmäksi, niin käytä sitä.</p>
+
+    <p>Download template file -napista voit ladata tekstitiedoston, johon voit kirjata mittaukset tietokoneella/puhelimella. Mittaukset ovat aina samassa järjestyksessä NW, SW, NE, SE, MID. Tekstitiedosto on siinä muodossa, että mittaukset voi kirjata järjestyksessä aina seuraavalle riville, kun seuraat kammioiden numerojärjestystä, joka näkyy alla olevassa kuvassa.</p>
+
+    <p>Eli aloitat kammiosta 1, mittaat NW/Luoteis/ylävasen, SW/lounaiskulman/alavasen, NE/Koilliskulman/yläoikea, SE/kaakkoiskulman/alaoikea ja lopulta MID/keskeltä, ja jatkat sitten kammioon 2.</p>
+
+    <figure>
+        <img src="kammiot.png" alt="placeholder chamber position map" style="width: 75%;">
+        <figcaption>Placeholder chamber position map</figcaption>
+    </figure>
+
+    <p>Mittaukseen tarvittavat työkalut. "Mittauskohdistin"</p>
+    </div>
+</body>
+</html>
+
