@@ -1,4 +1,4 @@
-from sqlalchemy import Table
+from sqlalchemy import Table, text
 from sqlalchemy.sql import select
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
@@ -23,7 +23,22 @@ def mk_user_table():
     User.metadata.create_all(engine)
 
 
+def check_existing_user(username):
+    existing_user_query = f"""
+        SELECT 1 FROM users WHERE username = '{username}';
+        """
+    with engine.connect() as conn:
+        existing_user = conn.execute(text(existing_user_query)).fetchone()
+
+    if existing_user:
+        print(f"User {username} already exists.")
+        return True
+
+
 def add_user(username, password, email, role):
+    if check_existing_user(username):
+        return
+
     hashed_password = generate_password_hash(password)
 
     ins = User_tbl.insert().values(
