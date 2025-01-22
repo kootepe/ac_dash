@@ -836,6 +836,13 @@ class MeasurementCycle:
                 t=25,
                 b=10,
             ),
+            legend=dict(
+                font=dict(size=13),
+                orientation="v",
+                tracegroupgap=3,
+                # itemclick=False,
+                # itemdoubleclick=False,
+            ),
             xaxis=dict(type="date"),
             autosize=True,
         )

@@ -5,7 +5,7 @@ import plotly.express as px
 import pandas as pd
 import logging
 
-from  .data_mgt import flux_table_to_df, flux_to_df
+from .data_mgt import flux_table_to_df, flux_to_df
 
 logger = logging.getLogger("defaultLogger")
 
@@ -85,7 +85,7 @@ def mk_attribute_plot(
         ),
         legend=dict(
             font=dict(size=13),
-            orientation="h",
+            orientation="v",
             tracegroupgap=3,
             # itemclick=False,
             # itemdoubleclick=False,
