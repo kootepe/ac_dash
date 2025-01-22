@@ -437,8 +437,10 @@ def apply_meteo_table_trigger():
     Updates the air_temperature and air_pressure values in flux_table
     based on the nearest start_time values.
     """
-    trigger_function_sql = """
-    CREATE OR REPLACE FUNCTION update_meteo_trigger()
+    trigger_func_name = "update_meteo_trigger"
+    trigger_name = "meteo_update_trigger"
+    trigger_function_sql = f"""
+    CREATE OR REPLACE FUNCTION {trigger_func_name}()
     RETURNS TRIGGER AS $$
     DECLARE
         nearest_start_time TIMESTAMP; -- Variable to hold the nearest start_time
@@ -465,11 +467,11 @@ def apply_meteo_table_trigger():
     $$ LANGUAGE plpgsql;
     """
 
-    trigger_sql = """
-    CREATE TRIGGER meteo_update_trigger
+    trigger_sql = f"""
+    CREATE TRIGGER {trigger_name}
     AFTER INSERT OR UPDATE OR DELETE ON meteo_table
     FOR EACH ROW
-    EXECUTE FUNCTION update_meteo_trigger();
+    EXECUTE FUNCTION {trigger_func_name}();
     """
 
     # Execute the SQL statements
@@ -554,14 +556,48 @@ def df_to_volume_table(df):
     return df_new
 
 
+def check_if_exists(engine, object_name, object_type):
+    """
+    Checks if a database object (function or trigger) exists.
+
+    Args:
+        engine: SQLAlchemy engine connection.
+        object_name: Name of the object to check.
+        object_type: Type of the object ('function' or 'trigger').
+
+    Returns:
+        True if the object exists, False otherwise.
+    """
+    if object_type == "function":
+        query = f"""
+        SELECT 1
+        FROM pg_proc
+        WHERE proname = '{object_name}';
+        """
+    elif object_type == "trigger":
+        query = f"""
+        SELECT 1
+        FROM pg_trigger
+        WHERE tgname = '{object_name}';
+        """
+    else:
+        raise ValueError("Invalid object type. Use 'function' or 'trigger'.")
+
+    with engine.connect() as conn:
+        result = conn.execute(text(query)).fetchone()
+        return result is not None
+
+
 def apply_volume_table_trigger():
     """
     Function that runs every time something changes in volume_table.
     Changes the chamber_height and updated_height (to true) for relevant measurements in
     flux_table.
     """
-    trigger_function_sql = """
-    CREATE OR REPLACE FUNCTION update_volume_trigger()
+    trigger_name = "height_update_trigger"
+    trigger_func_name = "update_volume_trigger"
+    trigger_function_sql = f"""
+    CREATE OR REPLACE FUNCTION {trigger_func_name}()
     RETURNS TRIGGER AS $$
     DECLARE
         next_datetime TIMESTAMP; -- Variable to hold the next newer datetime
@@ -586,19 +622,21 @@ def apply_volume_table_trigger():
     $$ LANGUAGE plpgsql;
     """
 
-    trigger_sql = """
-    CREATE TRIGGER height_update_trigger
+    trigger_sql = f"""
+    CREATE TRIGGER {trigger_name}
     AFTER UPDATE OR INSERT OR DELETE ON volume_table
     FOR EACH ROW
-    EXECUTE FUNCTION update_volume_trigger();
+    EXECUTE FUNCTION {trigger_func_name}();
     """
 
-    # Execute the SQL statements
     with engine.begin() as conn:
         try:
-            conn.execute(text(trigger_function_sql))
-            conn.execute(text(trigger_sql))
-        except Exception:
+            if not check_if_exists(engine, trigger_func_name, "function"):
+                conn.execute(text(trigger_function_sql))
+            if not check_if_exists(engine, trigger_name, "trigger"):
+                conn.execute(text(trigger_sql))
+        except Exception as e:
+            print(e)
             pass
 
 
