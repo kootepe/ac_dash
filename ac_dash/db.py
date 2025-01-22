@@ -3,10 +3,7 @@ from sqlalchemy import create_engine
 
 
 class Config(object):
-    # SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite://")
-    SQLALCHEMY_DATABASE_URI = (
-        "postgresql://hello_flask:hello_flask@db:5432/hello_flask_dev"
-    )
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite://")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
