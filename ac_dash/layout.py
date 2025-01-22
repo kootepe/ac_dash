@@ -17,7 +17,12 @@ start_date = initial_date - timedelta(days=7)
 logger = logging.getLogger("defaultLogger")
 
 
-graph_style = {"height": "300px", "width": "900px"}
+graph_style = {
+    "height": "15vw",
+    "width": "45vw",
+    "max-height": "300px",
+    "max-width": "900px",
+}
 upload_style = style = {
     "width": "30%",
     "height": "60px",
