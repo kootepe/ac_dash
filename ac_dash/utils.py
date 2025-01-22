@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict
 from datetime import datetime, timedelta
-from plotly.graph_objs import Figure
+from plotly.graph_objs import Figure, Layout
 from .db import engine
 
 from .tools.influxdb_funcs import init_client, ifdb_push, just_read, read_ifdb
@@ -432,7 +432,23 @@ def update_row(measurement, measurements):
 
 def no_data_response(selected_chambers, graph_names):
     """Return an empty response if no data is available."""
-    empty_figures = [[Figure() for _ in names] for names in graph_names]
+    layout = Layout(
+        annotations=[
+            dict(
+                name="draft watermark",
+                text="No calculated data in timerange",
+                textangle=0,
+                opacity=0.4,
+                font=dict(color="black", size=40),
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=0.5,
+                showarrow=False,
+            )
+        ]
+    )
+    empty_figures = [[Figure(layout=layout) for _ in names] for names in graph_names]
 
     return (
         *empty_figures,
