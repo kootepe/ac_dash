@@ -1,33 +1,26 @@
-import sys
 import os
 import json
 import logging
 import hashlib
 import zipfile
-from io import BytesIO
 
-from dash import ctx, callback_context, no_update
+from dash import ctx, no_update
 import pandas as pd
 import numpy as np
-from collections import defaultdict
 from datetime import datetime, timedelta
 from plotly.graph_objs import Figure, Layout
 from .db import engine
 
-from .tools.influxdb_funcs import init_client, ifdb_push, just_read, read_ifdb
+from .tools.influxdb_funcs import init_client, just_read
 
 from .measuring import instruments
 from .measurement import MeasurementCycle
 from .data_mgt import (
-    add_flux,
-    flux_df_to_table,
     df_to_gas_table,
     gas_table_to_df,
     cycle_table_to_df,
     single_flux_to_table,
     flux_range_to_df,
-    df_to_cycle_table,
-    flux_table_to_df,
     fluxes_to_table,
 )
 from .create_graph import (
@@ -575,55 +568,22 @@ def create_attribute_graph(
     triggered_elem,
     date_range,
     gas_graphs,
-    # old_plots,
     attribute,
     gas=None,
 ):
     """
     Create the lag graph with optional highlighting and zooming based on triggered actions.
     """
-    # used to store attribute plots so highlighter can be updated individually
-    # for each plot
-    if gas is None:
-        key = attribute
-    else:
-        key = f"{gas}_{attribute}"
-    # attribute_graph_item = Figure(old_plots.get(key))
-    attribute_graph_item = None
-
-    if (
-        attribute_graph_item is None
-        or triggered_elem == "skip-invalid"
-        or triggered_elem == "skip-valid"
-        or triggered_elem == "chamber-select"
-        or triggered_elem == "mark-invalid"
-        or triggered_elem == "mark-valid"
-        or triggered_elem == "push-single"
-        or triggered_elem == "parse-range"
-        or triggered_elem == "max-r"
-        or triggered_elem in gas_graphs
-    ):
-        measurements = update_row(measurement, measurements)
-        attribute_plot = mk_attribute_plot(
-            measurement,
-            measurements,
-            selected_chambers,
-            index,
-            date_range,
-            attribute,
-            gas,
-        )
-
-    # otherwise just update the highlighter
-    elif attribute_graph_item is not None:
-        logger.debug("Recreating highlight")
-        highlighter = apply_highlighter(measurement, attribute, gas)
-        updated_fig_data = attribute_graph_item["data"]
-        # last trace is the highlighter, so we drop it
-        fig = Figure(
-            list(updated_fig_data[:-1]) + [highlighter], attribute_graph_item.layout
-        )
-        return fig
+    measurements = update_row(measurement, measurements)
+    attribute_plot = mk_attribute_plot(
+        measurement,
+        measurements,
+        selected_chambers,
+        index,
+        date_range,
+        attribute,
+        gas,
+    )
     return attribute_plot
 
 
