@@ -357,4 +357,4 @@ def unauthorized_callback():
         return response
     else:
         # Redirect for non-API requests (e.g., web pages)
-        return redirect(url_for("/login/"))
+        return redirect("/login/")
