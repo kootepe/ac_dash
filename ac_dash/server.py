@@ -4,6 +4,8 @@ from flask import Flask
 from flask_restful import Api
 from flask_login import UserMixin, LoginManager
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import text
+from .db import engine
 
 
 from .users_mgt.users_mgt import (
@@ -48,12 +50,7 @@ mk_volume_table()
 apply_volume_table_trigger()
 
 for user in init_users:
-    try:
-        add_user(user["username"], user["password"], user["email"], user["role"])
-    except IntegrityError:
-        print("User exists.")
-
-show_users()
+    add_user(user["username"], user["password"], user["email"], user["role"])
 
 # initiate login manager
 server.config["SECRET_KEY"] = "my_secret_key"
