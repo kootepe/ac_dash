@@ -1,6 +1,6 @@
 from dash import html, dcc, dash_table
-from  .data_mgt import flux_table_to_df
-from  .data_mgt import Flux_tbl
+from .data_mgt import flux_table_to_df
+from .data_mgt import Flux_tbl
 
 
 def mk_db_view_page(columns=None):

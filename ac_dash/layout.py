@@ -348,12 +348,12 @@ def create_layout(layout_json, url):
             dcc.Link("Go to app", href=url, style={"padding-right": "15px"}),
             dcc.Link(
                 "Go to Settings",
-                href="/dashing/settings",
+                href=f"{url}settings",
                 style={"padding-right": "15px"},
             ),
             dcc.Link(
                 "Go to db view",
-                href="/dashing/db_view",
+                href=f"{url}db_view",
                 style={"padding-right": "15px"},
             ),
             html.Div(logout),

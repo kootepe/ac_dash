@@ -86,6 +86,7 @@ def mk_binds(settings):
 
 def register_callbacks(
     app,
+    url,
     main_page,
     settings_page,
     ifdb_read_dict,
@@ -511,11 +512,11 @@ def register_callbacks(
     )
     def display_page(pathname, settings_store, flux_col_store):
         logger.debug(settings_store)
-        if pathname == "/dashing/settings":
+        if pathname == f"{url}settings":
             page, _ = mk_settings(settings_store)
             page = mk_settings_page(page)
             return page
-        if pathname == "/dashing/db_view":
+        if pathname == f"{url}db_view":
             logger.info("Making db view")
             logger.info(flux_col_store)
             page = mk_db_view_page(flux_col_store)
@@ -589,6 +590,8 @@ def register_callbacks(
                 sort_action="native",
                 editable=True,
                 page_size=50,
+                style_data={"font-size": "15px"},
+                style_header={"font-size": "15px"},
             )
             button = html.Button("Use cols", id="submit-table-cols")
             return (
@@ -606,6 +609,9 @@ def register_callbacks(
                 data=df.to_dict("records"),
                 sort_action="native",
                 page_size=50,
+                style_table={"width": "80%", "margin": "auto"},
+                style_data={"font-size": "18px"},
+                style_header={"font-size": "18px"},
             )
             return no_update, [datatable], no_update, no_update, no_update
         if tab == "gas-db-tab":
@@ -617,6 +623,9 @@ def register_callbacks(
                 data=df.to_dict("records"),
                 sort_action="native",
                 page_size=50,
+                style_table={"width": "80%", "margin": "auto"},
+                style_data={"font-size": "18px"},
+                style_header={"font-size": "18px"},
             )
             placeholder = html.Div(
                 "Need to add logic for querying limited range of data"
@@ -630,6 +639,9 @@ def register_callbacks(
                 data=df.to_dict("records"),
                 sort_action="native",
                 page_size=50,
+                style_table={"width": "80%", "margin": "auto"},
+                style_data={"font-size": "18px"},
+                style_header={"font-size": "18px"},
             )
             return no_update, no_update, no_update, [datatable], no_update
         if tab == "meteo-db-tab":
@@ -640,6 +652,9 @@ def register_callbacks(
                 data=df.to_dict("records"),
                 sort_action="native",
                 page_size=50,
+                style_table={"width": "80%", "margin": "auto"},
+                style_data={"font-size": "18px"},
+                style_header={"font-size": "18px"},
             )
             return no_update, no_update, no_update, no_update, [datatable]
         return no_update, no_update, no_update, no_update, no_update

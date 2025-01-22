@@ -46,6 +46,7 @@ def mk_ac_plot(flask_app=None, url="/ac_dash/"):
     # Register callbacks
     register_callbacks(
         app,
+        url,
         main_page,
         settings_page,
         ifdb_read_dict,
