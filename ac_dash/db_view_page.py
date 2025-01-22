@@ -1,5 +1,4 @@
-from dash import html, dcc, dash_table
-from .data_mgt import flux_table_to_df
+from dash import html, dcc
 from .data_mgt import Flux_tbl
 
 
@@ -11,6 +10,9 @@ def mk_db_view_page(columns=None):
             html.Div(
                 [
                     html.H1("Db viewer"),
+                    html.P(
+                        "Work in progress, works for viewing but might have a bit bad of a user experience :-)"
+                    ),
                     dcc.Tabs(
                         id="db-view-tabs",
                         value="flux-db-tab",
