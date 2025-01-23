@@ -35,6 +35,10 @@ class Instrument(ABC):
         """Function to read the instrument's output file."""
         pass
 
+    @abstractmethod
+    def __repr__(self):
+        pass
+
 
 class LI7810(Instrument):
     """
@@ -92,6 +96,9 @@ class LI7810(Instrument):
     def read_output_file(self, file_path):
         return pd.read_csv(file_path, **self.pd_kwargs)
 
+    def __repr__(self):
+        return f"{self.model}, {self.serial}"
+
 
 class LI7810_reduced(Instrument):
     """
@@ -145,6 +152,9 @@ class LI7810_reduced(Instrument):
 
     def read_output_file(self, file_path):
         return pd.read_csv(file_path, **self.pd_kwargs)
+
+    def __repr__(self):
+        return f"{self.model}, {self.serial}"
 
 
 class LI7820(Instrument):
@@ -200,6 +210,9 @@ class LI7820(Instrument):
 
     def read_output_file(self, file_path):
         return pd.read_csv(file_path, **self.pd_kwargs)
+
+    def __repr__(self):
+        return f"{self.model}, {self.serial}"
 
 
 instruments = {
