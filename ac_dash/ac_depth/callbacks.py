@@ -31,7 +31,7 @@ import pandas as pd
 logger = logging.getLogger("defaultLogger")
 
 
-ifdb_dict = load_config().get("ac_depth_push")
+# ifdb_dict = load_config().get("ac_depth_push")
 
 height_modifier = {
     "mm": 0.001,
@@ -262,7 +262,7 @@ def register_callbacks(app, chambers, in_measurements):
 
         measurement_names = [measurement.lower() for measurement in in_measurements]
         role = current_user.role
-        measurement = ifdb_dict.get("measurement")
+        # measurement = ifdb_dict.get("measurement")
         # pts = query_log_point(measurement, ifdb_dict)
         # old_pts = show_old_measurements(pts, role)
         old_pts = ""
@@ -291,13 +291,13 @@ def register_callbacks(app, chambers, in_measurements):
         if elem_type == "del-button":
             logger.debug("Deleting point")
             time = dt.strptime(ctx.triggered_id.get("time"), "%Y-%m-%d %H:%M")
-            delete_by_uuid(ifdb_dict, time, ctx.triggered_id.get("id"))
+            # delete_by_uuid(ifdb_dict, time, ctx.triggered_id.get("id"))
             del_volume_measurement(
                 # time.astimezone(CONTAINER_TZ),
                 time,
                 ctx.triggered_id.get("chamber_id"),
             )
-            pts = query_log_point(measurement, ifdb_dict)
+            # pts = query_log_point(measurement, ifdb_dict)
             old_pts = show_old_measurements(pts, role)
             return old_pts, ""
         if elem_type == "submit":
@@ -356,7 +356,8 @@ def register_callbacks(app, chambers, in_measurements):
 
                 # ifdb_push(pt, ifdb_dict)
                 print("final old")
-                pts = query_log_point(measurement, ifdb_dict)
+                # pts = query_log_point(measurement, ifdb_dict)
+                pts = pd.DataFrame()
                 old_pts = show_old_measurements(pts, role)
 
                 return old_pts, ""

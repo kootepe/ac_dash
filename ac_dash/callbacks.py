@@ -95,8 +95,6 @@ def register_callbacks(
     url,
     main_page,
     settings_page,
-    ifdb_read_dict,
-    ifdb_push_dict,
     chambers,
     chamber_map,
     graph_names,
@@ -656,7 +654,7 @@ def register_callbacks(
             measurement,
             selected_chambers,
             date_range,
-        ) = handle_triggers(args, ifdb_read_dict, chambers, graph_names)
+        ) = handle_triggers(args, chambers, graph_names)
         logger.debug("Handled triggers")
         if measurements is None or measurements.empty:
             return no_data_response(chambers, [gas_graphs, attr_graphs])
@@ -665,8 +663,6 @@ def register_callbacks(
             triggered_elem,
             measurement,
             measurements,
-            ifdb_read_dict,
-            ifdb_push_dict,
             date_range,
         )
 

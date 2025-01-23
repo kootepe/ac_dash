@@ -170,8 +170,6 @@ def load_config():
     with open(f"{filepath}/config/config.json", "r") as f:
         config = json.load(f)
     return (
-        config["ifdb_read_dict"],
-        config["ifdb_push_dict"],
         config["chambers"],
         config["chamber_map"],
         config["layout"],
@@ -262,7 +260,7 @@ def organize_measurements_by_chamber(all_measurements):
 ### Trigger and State Handling Functions ###
 
 
-def handle_triggers(args, ifdb_read_dict, all_chambers, graph_names):
+def handle_triggers(args, all_chambers, graph_names):
     """
     Handle Dash triggers based on user interaction and return necessary information.
     """
@@ -483,7 +481,7 @@ def increment_index(index, measurements):
     return index
 
 
-def load_measurement_data(measurement, ifdb_read_dict):
+def load_measurement_data(measurement):
     """Load data for a specific measurement from InfluxDB."""
     instrument = measurement.get("instrument_model").replace("-", "")
     serial = measurement.get("instrument_serial")
@@ -499,9 +497,7 @@ def load_measurement_data(measurement, ifdb_read_dict):
     return m
 
 
-def execute_actions(
-    triggered_id, measurement, measurements, ifdb_read_dict, ifdb_push_dict, date_range
-):
+def execute_actions(triggered_id, measurement, measurements, date_range):
     """Execute specific actions based on user input (e.g., find max, delete lag, push data)."""
     # if triggered_id == "extend-time":
     #     logger.debug("extend-time clicked.")

@@ -28,8 +28,6 @@ def mk_ac_plot(flask_app=None, url="/ac_dash/"):
     init_logger()
     # Load configuration and cycles
     (
-        ifdb_read_dict,
-        ifdb_push_dict,
         chambers,
         chamber_map,
         layout_json,
@@ -49,8 +47,6 @@ def mk_ac_plot(flask_app=None, url="/ac_dash/"):
         url,
         main_page,
         settings_page,
-        ifdb_read_dict,
-        ifdb_push_dict,
         chambers,
         chamber_map,
         graph_names,
