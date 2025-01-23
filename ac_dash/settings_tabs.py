@@ -20,7 +20,7 @@ upload_style = style = {
     "margin": "10px",
     "padding": "10px",  # Add space inside the box
 }
-_, _, settings = load_config()
+_, _, settings, _ = load_config()
 
 generic_instruments = [
     {

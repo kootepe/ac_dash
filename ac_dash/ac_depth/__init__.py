@@ -4,7 +4,7 @@ from .callbacks import register_callbacks
 import logging
 
 from ..common_utils.utils import protect_dash_app
-from .utils import load_config
+from ..utils import load_config
 
 from flask import send_from_directory, session, abort
 from pathlib import Path
@@ -36,11 +36,9 @@ def mk_ac_depth(flask_app, url):
             abort(403)
         return send_from_directory(HERE, "kammiot.png")
 
-    config = load_config()
-    chamber_blocks = config["chambers"]
-    measurements = config["measurements"]
-    app.layout = create_layout(chamber_blocks, measurements)
-    register_callbacks(app, chamber_blocks, measurements)
+    chamber_blocks, _, _, measurement_spots = load_config()
+    app.layout = create_layout(chamber_blocks, measurement_spots)
+    register_callbacks(app, chamber_blocks, measurement_spots)
 
     protect_dash_app(flask_app, app)
 

@@ -168,11 +168,15 @@ def load_config():
     """Load configuration for InfluxDB."""
     filepath = os.path.abspath(os.path.dirname(__file__))
     with open(f"{filepath}/config/config.json", "r") as f:
-        config = json.load(f)
+        defaults = json.load(f)
+    with open(f"{filepath}/config/custom.json", "r") as f:
+        custom = json.load(f)
+    config = {**defaults, **custom}
     return (
         config["chambers"],
         config["chamber_map"],
         config["layout"],
+        config["measurements"],
     )
 
 

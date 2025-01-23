@@ -29,7 +29,7 @@ from ..db import engine
 
 logger = logging.getLogger("defaultLogger")
 
-(_, chamber_map, _) = load_config()
+(_, chamber_map, _, _) = load_config()
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
