@@ -967,6 +967,8 @@ class MeasurementCycle:
             return False
 
     def __repr__(self):
-        formatted = f"{self.lagtime:4}"
-        html = formatted.replace(" ", "\u00a0")
-        return f"{self.start_time}, lag: {html}, temp: {self.air_temperature:.2f}, error flags: {self.error_string} "
+        formatted_lag = f"{self.lagtime:4}"
+        html_lag = formatted_lag.replace(" ", "\u00a0")
+        formatted_h = f"{self.chamber_height:4}"
+        html_h = formatted_h.replace(" ", "\u00a0")
+        return f"{self.start_time}, height: {html_h} lag: {html_lag}, temp: {self.air_temperature:.2f}, error flags: {self.error_string} "
