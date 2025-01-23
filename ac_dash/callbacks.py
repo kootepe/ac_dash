@@ -64,6 +64,7 @@ from .data_init import (
     read_cycle_init_input,
     read_meteo_init_input,
     read_volume_init_input,
+    init_flux,
 )
 
 cycle_tbl_cols = [col.name for col in Cycle_tbl.columns]
@@ -253,30 +254,10 @@ def register_callbacks(
         State("init-end", "value"),
         prevent_initial_call=True,
     )
-    def init_flux(init, start, end):
-        logger.info("Initiating")
-        if start is None:
-            return "Give start date"
-        if end is None:
-            return "Give end date"
-        try:
-            pd.to_datetime(start, format="%Y-%m-%d")
-            pd.to_datetime(end, format="%Y-%m-%d")
-        except Exception:
-            return "give YYYY-MM-DD date"
-        fluxes = flux_table_to_df()
-        dupes = set(fluxes["start_time"])
-        logger.debug(fluxes)
-        if ctx.triggered_id == "init-flux":
-            with engine.connect() as conn:
-                df = cycle_table_to_df(start, end)
-                if df.empty or df is None:
-                    return f"No cycles between {start} and {end}."
-                logger.debug(df)
-                df = df[~df["start_time"].isin(dupes)]
-                df.sort_values("start_time", inplace=True)
-                logger.debug(df)
-                init_from_cycle_table(df, None, None, conn)
+    def init_flux_callback(init, start, end):
+        elem = ctx.triggered_id
+        warn = init_flux(init, start, end, elem)
+        return warn
 
     @app.callback(
         Output("model-input-warn", "children"),

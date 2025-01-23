@@ -4,13 +4,21 @@ import logging
 import traceback
 import pandas as pd
 
+from .db import engine
 from .measuring import instruments
-from .data_mgt import df_to_gas_table, df_to_cycle_table, df_to_meteo_table
+from .data_mgt import (
+    df_to_gas_table,
+    df_to_cycle_table,
+    df_to_meteo_table,
+    cycle_table_to_df,
+    flux_table_to_df,
+)
 from .utils import (
     process_measurement_file,
     process_measurement_zip,
     process_protocol_file,
     process_protocol_zip,
+    init_from_cycle_table,
 )
 
 logger = logging.getLogger("defaultLogger")
@@ -147,6 +155,32 @@ def read_meteo_init_input(source, contents, filename):
     except Exception as e:
         logger.debug(traceback.format_exc())
         return f"Exception {e}", ""
+
+
+def init_flux(init, start, end, triggered_elem):
+    logger.info("Initiating")
+    if start is None:
+        return "Give start date"
+    if end is None:
+        return "Give end date"
+    try:
+        pd.to_datetime(start, format="%Y-%m-%d")
+        pd.to_datetime(end, format="%Y-%m-%d")
+    except Exception:
+        return "give YYYY-MM-DD date"
+    fluxes = flux_table_to_df()
+    dupes = set(fluxes["start_time"])
+    logger.debug(fluxes)
+    if triggered_elem == "init-flux":
+        with engine.connect() as conn:
+            df = cycle_table_to_df(start, end, conn)
+            if df.empty or df is None:
+                return f"No cycles between {start} and {end}."
+            logger.debug(df)
+            df = df[~df["start_time"].isin(dupes)]
+            df.sort_values("start_time", inplace=True)
+            logger.debug(df)
+            init_from_cycle_table(df, None, None, conn)
 
 
 def read_volume_init_input(contents, filename):
