@@ -971,4 +971,4 @@ class MeasurementCycle:
         html_lag = formatted_lag.replace(" ", "\u00a0")
         formatted_h = f"{self.chamber_height:4}"
         html_h = formatted_h.replace(" ", "\u00a0")
-        return f"{self.start_time}, height: {html_h} lag: {html_lag}, temp: {self.air_temperature:.2f}, error flags: {self.error_string} "
+        return f"{self.start_time}, height: {html_h}m, lag: {html_lag}s, temp: {self.air_temperature:.2f}c, error flags: {self.error_string} "
