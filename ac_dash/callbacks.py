@@ -59,7 +59,7 @@ from .layout import (
 )
 from .db_view_page import mk_db_view_page
 from .data_mgt import Cycle_tbl
-from .data_init import read_gas_init_input
+from .data_init import read_gas_init_input, read_cycle_init_input, read_meteo_init_input
 
 cycle_tbl_cols = [col.name for col in Cycle_tbl.columns]
 
@@ -296,57 +296,9 @@ def register_callbacks(
         State("upload-protocol", "filename"),
         prevent_initial_call=True,
     )
-    def read_cycle_init_input(contents, filename):
-        """Read data passed from the settings page"""
-        # global instruments
-        content_type, content_str = contents.split(",")
-        decoded = base64.b64decode(content_str)
-        try:
-            if "csv" in filename:
-                df = pd.read_csv(io.StringIO(decoded.decode("utf-8")))
-                df["start_time"] = pd.to_datetime(df["start_time"], format="ISO8601")
-                try:
-                    df["start_time"] = (
-                        df["start_time"]
-                        .dt.tz_localize("Europe/Helsinki", ambiguous=True)
-                        .dt.tz_convert("UTC")
-                    )
-                except Exception:
-                    pass
-                inrows = len(df)
-                pushed_data = df_to_cycle_table(df)
-
-                if pushed_data.empty:
-                    row_count = 0
-                else:
-                    row_count = len(pushed_data)
-                return "", f"Pushed {inrows}/{row_count}"
-
-            # Read the CSV into a Pandas DataFrame
-            if "log" in filename:
-                df = process_protocol_file(
-                    io.StringIO(decoded.decode("utf-8")), chamber_map
-                )
-                in_cycles = len(df)
-
-                pushed_data = df_to_cycle_table(df)
-                if pushed_data.empty:
-                    row_count = 0
-                else:
-                    row_count = len(pushed_data)
-                return "", f"Pushed {row_count}/{in_cycles}"
-
-            if "zip" in filename:
-                df = process_protocol_zip(io.BytesIO(decoded), chamber_map)
-                in_cycles = len(df)
-                pushed_data = df_to_cycle_table(df)
-                if pushed_data.empty:
-                    row_count = 0
-                else:
-                    row_count = len(pushed_data)
-                return "", f"Pushed {row_count}/{in_cycles}"
-        except Exception as e:
-            return f"Returned exception {e}", ""
+    def cycle_init_callback(contents, filename):
+        warn, show = read_cycle_init_input(contents, filename, chamber_map)
+        return warn, show
 
     @app.callback(
         Output("meteo-input-warn", "children"),
@@ -356,46 +308,9 @@ def register_callbacks(
         State("upload-meteo", "filename"),
         prevent_initial_call=True,
     )
-    def read_meteo_init_input(source, contents, filename):
-        """Read data passed from the settings page"""
-        # global instruments
-        if source is None:
-            return "Select site.", ""
-        content_type, content_str = contents.split(",")
-        ext = filename.split(".")[-1].lower()
-        decoded = base64.b64decode(content_str)
-        file_exts = ["csv", "data", "dat"]
-
-        def read_meteo_file(file):
-            df = pd.read_csv(file)
-            df["datetime"] = pd.to_datetime(df["datetime"], format="ISO8601")
-            df["datetime"] = (
-                df["datetime"]
-                .dt.tz_localize(
-                    "Europe/Helsinki", ambiguous=True, nonexistent="shift_forward"
-                )
-                .dt.tz_convert("UTC")
-            )
-            return df
-
-        try:
-            file_exts = ["csv"]
-            if ext in file_exts:
-                logger.debug("Read file.")
-                df = read_meteo_file(io.StringIO(decoded.decode("utf-8")))
-                logger.debug("Adding source.")
-                df["source"] = source
-                in_rows = len(df)
-                logger.debug("Pushing to table")
-                pushed_data = df_to_meteo_table(df)
-                push_rows = len(pushed_data)
-                return "", f"Pushed {push_rows}/{in_rows}"
-
-            else:
-                return "Wrong filetype extension", ""
-        except Exception as e:
-            logger.debug(traceback.format_exc())
-            return f"Exception {e}", ""
+    def meteo_init_callback(source, contents, filename):
+        warn, show = read_meteo_init_input(source, contents, filename)
+        return warn, show
 
     @app.callback(Output("graph-div", "children"), Input("settings-store", "data"))
     def mk_display_graphs(settings):
