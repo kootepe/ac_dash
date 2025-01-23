@@ -259,7 +259,50 @@ data_init_tabs = [
                                                 id="upload-meteo",
                                                 children=html.Div(
                                                     [
-                                                        "Click to select log/csv/zip or drag and drop",
+                                                        "Click to select csv/zip or drag and drop",
+                                                    ],
+                                                    style=upload_style,
+                                                ),
+                                            ),
+                                        ],
+                                        style={
+                                            "display": "flex",
+                                            "flex-direction": "column",
+                                            "justify-content": "center",
+                                            "align-items": "center",
+                                            "padding": "15px",
+                                            "background": "white",
+                                            "border": "1px solid #ccc",
+                                            "box-shadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                                        },
+                                    ),
+                                ],
+                                style={
+                                    # "width": "45vw",
+                                },
+                            ),
+                            dcc.Tab(
+                                label="Upload volume data -- not implemented yet",
+                                children=[
+                                    html.Div(
+                                        [
+                                            html.Div(
+                                                id="volume-input-warn",
+                                                style={
+                                                    "background-color": "salmon",
+                                                },
+                                            ),
+                                            html.Div(
+                                                id="volume-input-show",
+                                                style={
+                                                    "background-color": "greenyellow",
+                                                },
+                                            ),
+                                            dcc.Upload(
+                                                id="upload-volume",
+                                                children=html.Div(
+                                                    [
+                                                        "Click to select csv/zip or drag and drop",
                                                     ],
                                                     style=upload_style,
                                                 ),

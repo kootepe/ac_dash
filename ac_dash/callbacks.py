@@ -59,7 +59,12 @@ from .layout import (
 )
 from .db_view_page import mk_db_view_page
 from .data_mgt import Cycle_tbl
-from .data_init import read_gas_init_input, read_cycle_init_input, read_meteo_init_input
+from .data_init import (
+    read_gas_init_input,
+    read_cycle_init_input,
+    read_meteo_init_input,
+    read_volume_init_input,
+)
 
 cycle_tbl_cols = [col.name for col in Cycle_tbl.columns]
 
@@ -310,6 +315,18 @@ def register_callbacks(
     )
     def meteo_init_callback(source, contents, filename):
         warn, show = read_meteo_init_input(source, contents, filename)
+        return warn, show
+
+    @app.callback(
+        Output("volume-input-warn", "children"),
+        Output("volume-input-show", "children"),
+        State("volume-source-input", "value"),
+        Input("upload-volume", "contents"),
+        State("upload-volume", "filename"),
+        prevent_initial_call=True,
+    )
+    def volume_init_callback(source, contents, filename):
+        warn, show = read_volume_init_input(source, contents, filename)
         return warn, show
 
     @app.callback(Output("graph-div", "children"), Input("settings-store", "data"))

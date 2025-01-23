@@ -147,3 +147,7 @@ def read_meteo_init_input(source, contents, filename):
     except Exception as e:
         logger.debug(traceback.format_exc())
         return f"Exception {e}", ""
+
+
+def read_volume_init_input(contents, filename):
+    pass
