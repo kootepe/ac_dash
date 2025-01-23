@@ -15,7 +15,6 @@ git clone git@github.com:kootepe/ac_dash.git
 ```
 Add file ```.env.dev``` with this content:
 ```
-
 FLASK_APP=app.py
 FLASK_DEBUG=1
 DATABASE_URL=postgresql://hello_flask:hello_flask@db:5432/hello_flask_dev
@@ -24,5 +23,8 @@ SQL_PORT=5432
 DATABASE=postgres
 FLASK_CONFIG=ac_dash.db.Config
 ```
-
+and run
+```
+docker compose up --build
+```
 
