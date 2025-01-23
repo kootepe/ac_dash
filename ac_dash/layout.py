@@ -223,7 +223,7 @@ def mk_settings_page(all_settings):
                         ],
                     ),
                     dcc.Tab(
-                        label="Keybinds",
+                        label="Keybinds -- not implemented yet",
                         children=[keybinds],
                     ),
                     dcc.Tab(label="Data initiation", children=data_init_tabs),
