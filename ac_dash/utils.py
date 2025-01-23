@@ -141,6 +141,8 @@ def process_measurement_zip(file_path, instrument):
     with zipfile.ZipFile(file_path, "r") as z:
         file_list = z.namelist()
 
+        in_rows = 0
+        push_rows = 0
         for file_name in file_list:
             file_exts = ("csv", "DATA", "DAT")
             if file_name.endswith(file_exts):
@@ -149,10 +151,17 @@ def process_measurement_zip(file_path, instrument):
                 # open file and read to dataframe
                 with z.open(file_name) as f:
                     df = instrument.read_output_file(f)
+                    df["datetime"] = (
+                        df["datetime"]
+                        .dt.tz_localize("Europe/Helsinki", ambiguous=True)
+                        .dt.tz_convert("UTC")
+                    )
                     df["instrument_serial"] = instrument.serial
                     df["instrument_model"] = instrument.model
-                    _ = df_to_gas_table(df)
-    return
+                    df_copy, dupes = df_to_gas_table(df)
+                    in_rows += len(df)
+                    push_rows += len(df_copy)
+    return push_rows, in_rows
 
 
 def load_config():

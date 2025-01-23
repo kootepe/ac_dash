@@ -37,10 +37,7 @@ def read_gas_init_input(use_class, serial, model, contents, filename):
             push_rows, in_rows = process_measurement_zip(
                 io.BytesIO(decoded), instrument
             )
-            # in_rows = len(df)
-            # pushed_data, dupes = df_to_gas_table(df)
-            push_rows = len(pushed_data)
-            return "", f"Pushed {push_rows}/{in_rows}"
+            return "", f"Pushed {push_rows}/{in_rows} rows."
         else:
             return "Wrong filetype extension", ""
     except Exception as e:
