@@ -357,7 +357,7 @@ data_init_tabs = [
                 ],
             ),
             dcc.Tab(
-                label="Initiate from influxDB.",
+                label="Initiate from influxDB. -- not implemented yet",
                 children=[
                     html.Div(
                         [
