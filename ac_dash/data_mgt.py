@@ -2,7 +2,15 @@ import logging
 import pandas as pd
 import pandas.api.types as ptypes
 from datetime import timedelta
-from sqlalchemy import Table, update, text, delete, PrimaryKeyConstraint, inspect
+from sqlalchemy import (
+    Table,
+    update,
+    text,
+    delete,
+    PrimaryKeyConstraint,
+    inspect,
+    distinct,
+)
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select, desc
 from flask_sqlalchemy import SQLAlchemy
@@ -277,8 +285,8 @@ def flux_range_to_df(start, end, chamber_ids, is_valid=None):
 
 class GasMeasurement(db.Model):
     __tablename__ = "gas_table"
-    instrument_model = db.Column(db.String(25), nullable=False)
-    instrument_serial = db.Column(db.String(25), nullable=False)
+    instrument_model = db.Column(db.String(25), nullable=False, index=True)
+    instrument_serial = db.Column(db.String(25), nullable=False, index=True)
     datetime = db.Column(db.DateTime(timezone=True), index=True)
     CH4 = db.Column(db.Float, nullable=True)
     CO2 = db.Column(db.Float, nullable=True)
@@ -291,6 +299,13 @@ class GasMeasurement(db.Model):
             "datetime", "instrument_serial", name="pk_datetime_serial"
         ),
     )
+
+
+Gas_tbl = Table("gas_table", GasMeasurement.metadata)
+
+
+def mk_gas_table():
+    GasMeasurement.metadata.create_all(engine)
 
 
 # NOTE: move this down
@@ -313,11 +328,14 @@ def gas_table_to_df(start=None, end=None, conn=None):
     return df
 
 
-Gas_tbl = Table("gas_table", GasMeasurement.metadata)
+def get_distinct_instrument():
+    query = query = select(Gas_tbl.c.instrument_serial).distinct()
 
-
-def mk_gas_table():
-    GasMeasurement.metadata.create_all(engine)
+    # Execute the query
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        distinct_values = [row[0] for row in result]
+    return distinct_values
 
 
 def df_to_gas_table(df):

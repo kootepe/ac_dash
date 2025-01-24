@@ -4,9 +4,10 @@ from datetime import date
 from datetime import timedelta
 import pandas as pd
 import logging
+import json
 
 from .settings_tabs import data_init_tabs, custom_instruments
-from .data_mgt import Flux_tbl
+from .data_mgt import Flux_tbl, get_distinct_instrument
 
 columns = [column.name for column in Flux_tbl.columns]
 
@@ -39,7 +40,18 @@ upload_style = style = {
 }
 
 
-def mk_main_page(left_settings, right_settings):
+def mk_main_page(left_settings, right_settings, instruments):
+    serials = get_distinct_instrument()
+    found = {}
+    for serial in serials:
+        for instrument_name, details in instruments.items():
+            if details.get("serial") == serial:
+                found[instrument_name] = details
+    avail_instruments = [
+        {"label": f"{key}", "value": json.dumps({key: item})}
+        for key, item in found.items()
+    ]
+
     left_graphs = [
         dcc.Graph(
             id={"type": "gas-graph", "index": f"{graph_name}-plot"},
@@ -111,8 +123,8 @@ def mk_main_page(left_settings, right_settings):
             html.Div(
                 [
                     dcc.Dropdown(
-                        options=custom_instruments,
-                        value=custom_instruments[0]["value"],
+                        options=avail_instruments,
+                        value=avail_instruments[0]["value"],
                         # options=[
                         #     {
                         #         "label": f"Generic {key}",

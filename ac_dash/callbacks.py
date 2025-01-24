@@ -48,6 +48,7 @@ from .data_mgt import (
     df_to_gas_table,
     df_to_cycle_table,
     df_to_meteo_table,
+    get_distinct_instrument,
 )
 from .create_graph import apply_graph_zoom
 from .layout import (
@@ -112,6 +113,14 @@ def register_callbacks(
         # Input("prev-button", "id"),
         # Input("next-button", "id"),
     )
+
+    @app.callback(
+        Output("used-instrument-select", "options"),
+        Input("instrument-init", "id"),
+    )
+    def init_data():
+        get_distinct_instrument()
+        pass
 
     @app.callback(
         Output("model-input-div", "style"),
@@ -395,6 +404,7 @@ def register_callbacks(
         else:
             page, _, _ = mk_main_page(
                 settings_store["gas_graphs"], settings_store["attribute_graphs"]
+                settings_store["instruments"],
             )
             return page
 
