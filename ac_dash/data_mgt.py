@@ -575,6 +575,36 @@ def mk_volume_table():
     Volume.metadata.create_all(engine)
 
 
+def get_single_volume(timestamp):
+    logger.debug("Running get single temp")
+    # select_st = select(Meteo_tbl).where(
+    #     Meteo_tbl.c.datetime >= (start - pd.Timedelta(days=1)),
+    #     Meteo_tbl.c.datetime <= (start + pd.Timedelta(days=1)),
+    # )
+    start = timestamp - pd.Timedelta(days=365)
+    end = timestamp + pd.Timedelta(minutes=365)
+    # query = f"""SELECT *
+    #         FROM meteo_table
+    #         ORDER BY ABS(EXTRACT(EPOCH FROM (your_datetime_column - TIMESTAMP '{start}')))
+    #         LIMIT 1;"""
+    query = f"""
+            SELECT *
+            FROM meteo_table
+            WHERE datetime BETWEEN TIMESTAMP '{start}' 
+                                        AND TIMESTAMP '{end}'
+            ORDER BY ABS(EXTRACT(EPOCH FROM (datetime - TIMESTAMP '{start}')))
+            LIMIT 1;
+            """
+    df = pd.read_sql_query(query, engine)
+    if df is None or df.empty:
+        return None, None
+    data = df.iloc[0]
+
+    height = data.get("height")
+
+    return height
+
+
 def df_to_volume_table(df):
     table = Volume.__tablename__
     primary_keys = get_primary_keys(table, engine)

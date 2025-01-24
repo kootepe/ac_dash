@@ -11,9 +11,14 @@ from .tools.gas_funcs import (
     calculate_gas_flux,
     calculate_slope,
 )
-from .data_mgt import get_single_temperature
+from .data_mgt import get_single_meteo
 from .validation import check_valid_early, check_valid_deferred
-from .data_mgt import gas_table_to_df, flux_to_df, single_flux_to_table
+from .data_mgt import (
+    gas_table_to_df,
+    flux_to_df,
+    single_flux_to_table,
+    get_single_volume,
+)
 from .tools.filter import get_datetime_index
 from .validation import parse_error_codes, error_codes
 from .measuring import instruments
@@ -76,9 +81,9 @@ class MeasurementCycle:
                 single_flux_to_table(self.get_attribute_df())
 
             return
-        self.air_temperature, self.air_pressure = get_single_temperature(
-            self.start_time
-        )
+        # BUG: this assumes that a row always has both temp and pressure
+        self.air_temperature, self.air_pressure = get_single_meteo(self.start_time)
+        self.chamber_height = get_single_volume(self.start_time)
         logger.debug("No flux in db")
 
         # used to look for the drop indicating the opening of the chamber for
@@ -191,6 +196,10 @@ class MeasurementCycle:
 
     @chamber_height.setter
     def chamber_height(self, value):
+        if value is None:
+            self.chamber_height = 1
+            self.default_height = True
+            return
         if isinstance(value, (float, int, np.int64, np.float64)):
             self._chamber_height = value
             self.default_height = False
