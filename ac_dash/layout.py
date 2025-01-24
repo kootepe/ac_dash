@@ -6,7 +6,7 @@ import pandas as pd
 import logging
 import json
 
-from .settings_tabs import data_init_tabs, custom_instruments
+from .settings_tabs import data_init_tabs, upload_instruments
 from .data_mgt import Flux_tbl, get_distinct_instrument
 
 columns = [column.name for column in Flux_tbl.columns]
@@ -187,6 +187,7 @@ def mk_settings(settings_json):
     stored_settings = {}
     for key, setting in settings_json.items():
         # if setting.get("type", None) is None and isinstance(setting, dict):
+        logger.debug(setting)
         if not isinstance(setting, dict) or setting.get("type", None) is None:
             stored_settings[key] = setting
             continue
@@ -278,12 +279,16 @@ def create_layout(layout_json, url):
     logger.debug("Creating layout.")
     left_graphs = settings_json["gas_graphs"]
     right_graphs = settings_json["attribute_graphs"]
+    instruments = layout_json["instruments"]
 
     all_settings, stored = mk_settings(settings_json)
     settings_page = mk_settings_page(all_settings)
 
-    main_page, graph_names, graphs = mk_main_page(left_graphs, right_graphs)
+    main_page, graph_names, graphs = mk_main_page(
+        left_graphs, right_graphs, instruments
+    )
     stored["graph_names"] = graph_names
+    stored["instruments"] = instruments
     logout = html.A("Log out", href="/logout")
 
     layout = html.Div(
@@ -291,6 +296,7 @@ def create_layout(layout_json, url):
             dcc.Location(id="url", refresh=False),
             dcc.Store(id="settings-store", data=stored, storage_type="local"),
             dcc.Store("flux-table-col-store", data=columns, storage_type="local"),
+            html.Div(id="instrument-init", style={"display": "none"}),
             html.A("Go to Home Page", href="/", style={"padding-right": "15px"}),
             dcc.Download(id="dl-template"),
             dcc.Link("Go to app", href=url, style={"padding-right": "15px"}),

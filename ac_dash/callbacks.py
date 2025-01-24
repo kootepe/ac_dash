@@ -379,6 +379,7 @@ def register_callbacks(
                         store[setting]["value"] = value
                         # store[setting]["type"] = show_type
 
+            logger.info(store)
             display, store = mk_settings(store)
             return store, display
         return no_update, no_update
@@ -403,7 +404,8 @@ def register_callbacks(
             return page
         else:
             page, _, _ = mk_main_page(
-                settings_store["gas_graphs"], settings_store["attribute_graphs"]
+                settings_store["gas_graphs"],
+                settings_store["attribute_graphs"],
                 settings_store["instruments"],
             )
             return page
