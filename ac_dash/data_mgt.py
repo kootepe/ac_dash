@@ -418,7 +418,17 @@ class Meteo(db.Model):
 Meteo_tbl = Table("meteo_table", Meteo.metadata)
 
 
-def get_single_temperature(timestamp):
+def get_distinct_meteo_source():
+    query = query = select(Meteo_tbl.c.source).distinct()
+
+    # Execute the query
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        distinct_values = [row[0] for row in result]
+    return distinct_values
+
+
+def get_single_meteo(timestamp):
     logger.debug("Running get single temp")
     # select_st = select(Meteo_tbl).where(
     #     Meteo_tbl.c.datetime >= (start - pd.Timedelta(days=1)),

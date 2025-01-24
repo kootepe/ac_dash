@@ -3,6 +3,7 @@ import json
 from dash import dcc, html
 from .measuring import class_model_key
 from .utils import load_config
+from .data_mgt import get_distinct_meteo_source
 
 logger = logging.getLogger("defaultLogger")
 
@@ -32,15 +33,24 @@ generic_instruments = [
 
 
 upload_instruments = [
-    {"label": f"{key}", "value": json.dumps({key: item})}
+    {
+        "label": f"{key}",
+        "value": json.dumps({key: item}),
+    }
     for key, item in settings["upload_instruments"].items()
-]
-custom_instruments = [
-    {"label": f"{key}", "value": json.dumps(item)}
-    for key, item in settings["instruments"].items()
 ]
 
 instruments = upload_instruments + generic_instruments
+
+distinct_source = get_distinct_meteo_source()
+
+distinct_source = [
+    {
+        "label": f"{item}",
+        "value": json.dumps({item: item}),
+    }
+    for item in distinct_source
+]
 
 data_init_tabs = [
     dcc.Tabs(
@@ -222,7 +232,7 @@ data_init_tabs = [
                                     html.Div(
                                         [
                                             html.Label(
-                                                "Select what type of cycles you are uploading"
+                                                "Select what source of meteo data you are uploading"
                                             ),
                                             html.Div(
                                                 id="meteo-input-warn",
@@ -331,6 +341,17 @@ data_init_tabs = [
                                         html.Div(
                                             id="init-flux-warn",
                                             style={"background-color": "salmon"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Label("Select meteo source"),
+                                                dcc.Dropdown(
+                                                    id="flux-init-meteo-source",
+                                                    options=distinct_source,
+                                                    value=distinct_source[0],
+                                                    style={"width": "20vw"},
+                                                ),
+                                            ]
                                         ),
                                         dcc.Input(
                                             placeholder="Start date", id="init-start"
