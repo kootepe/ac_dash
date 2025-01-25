@@ -210,9 +210,7 @@ def generate_measurements(month, cycles):
     return all_measurements
 
 
-def init_from_cycle_table(cycle_df, use_class, serial, conn=None):
-    use_class = "LI7810"
-    serial = "TG10-01169"
+def init_from_cycle_table(cycle_df, use_class=None, serial=None, conn=None):
     instrument = instruments.get(use_class)(serial)
     all_measurements = []
     o = 0
@@ -350,6 +348,7 @@ def handle_triggers(args, all_chambers, graph_names):
         triggered_elem == "chamber-select"
         or triggered_elem == "skip-invalid"
         or triggered_elem == "skip-valid"
+        or triggered_elem == "toggle-valid"
     ):
         nearest_index = (df_meas["start_time"] - pd.to_datetime(index)).abs().idxmin()
         index = df_meas.loc[nearest_index].get("start_time")
@@ -585,7 +584,7 @@ def create_gas_plots(measurement, graph_names, settings):
     figs = [Figure() for _ in graph_names]
     gases = [name.split("-")[0] for name in graph_names]
     logger.debug(gases)
-    colors = ["blue", "green"]
+    colors = ["blue", "green", "red"]
     if measurement.data is not None and not measurement.data.empty:
         figs = [
             measurement.mk_gas_plot(

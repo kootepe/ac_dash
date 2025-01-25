@@ -339,11 +339,12 @@ def register_callbacks(
         Input("init-flux", "n_clicks"),
         State("init-start", "value"),
         State("init-end", "value"),
+        State("flux-init-instrument-select", "value"),
         State("flux-init-meteo-source", "value"),
         prevent_initial_call=True,
     )
-    def init_flux_callback(init, start, end):
-        warn = init_flux(init, start, end)
+    def init_flux_callback(init, start, end, instrument, meteo):
+        warn = init_flux(init, start, end, instrument, meteo)
         return warn
 
     @app.callback(Output("graph-div", "children"), Input("settings-store", "data"))

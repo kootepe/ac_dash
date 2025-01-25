@@ -343,7 +343,7 @@ data_init_tabs = [
                                             style={"background-color": "salmon"},
                                         ),
                                         html.Label(
-                                            "Select which instrument you are uploading data from"
+                                            "Select which instrument you are initiating calculations for"
                                         ),
                                         dcc.Dropdown(
                                             options=instruments,
