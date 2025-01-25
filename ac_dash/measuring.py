@@ -215,13 +215,72 @@ class LI7820(Instrument):
         return f"{self.model}, {self.serial}"
 
 
+class LI7820_reduced(Instrument):
+    """
+    Implementation for LI-COR LI-7820 gas analyzer and the reduced output file used at oulanka.
+
+    Attributes
+    ----------
+    gases : list
+    List of measured gases
+
+    units : dict
+    Dictionary of measured gases and their units
+
+    """
+
+    def __init__(self, serial):
+        # Ensure the base class attributes are initialized
+        model = "LI-7820"
+        super().__init__(model, serial)
+        self._gases = ["N2O", "H2O"]
+        self._flux_gases = ["N2O"]
+        self._units = {"N2O": "ppb", "H2O": "ppm"}
+        self.pd_kwargs = {
+            "sep": ",",
+            "dtype": {
+                "N2O": "float",
+                "H2O": "float",
+                "DIAG": "int",
+                "datetime": "str",
+            },
+            # "index_col": "datetime",
+            # pandas will combine these columns and parse the dates with
+            # date_fromat
+            # "parse_dates": ["datetime"],
+            # "date_format": "ISO8601",
+            # "date_format": "%Y-%m-%d %H:%M:%S",
+        }
+        self.diag_col = "DIAG"
+
+    @property
+    def gases(self):
+        return self._gases
+
+    @property
+    def flux_gases(self):
+        return self._flux_gases
+
+    @property
+    def units(self):
+        return self._units
+
+    def read_output_file(self, file_path):
+        return pd.read_csv(file_path, **self.pd_kwargs)
+
+    def __repr__(self):
+        return f"{self.model}, {self.serial}"
+
+
 instruments = {
     "LI7810": LI7810,
     "LI7810_reduced": LI7810_reduced,
     "LI7820": LI7820,
+    "LI7820_reduced": LI7820_reduced,
 }
 class_model_key = {
     "LI7810": "LI-7810",
     "LI7810_reduced": "LI-7810",
     "LI7820": "LI-7820",
+    "LI7820_reduced": "LI-7820",
 }
