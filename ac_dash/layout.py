@@ -233,7 +233,85 @@ def create_dropdown(settings, name):
     )
 
 
-def mk_settings_page(all_settings):
+cell_border = {
+    "border": "1px solid #bbb",
+    "font-size": "14px",
+}
+
+input_style = {"outline": "none", "border": "none"}
+
+
+def mk_settings_page(settings_elems, settings_json):
+    def mk_row(button):
+        return html.Tr(
+            [
+                html.Td(
+                    button,
+                    style=cell_border,
+                ),
+                html.Td(
+                    dcc.Input(
+                        placeholder="Give keycode",
+                        style=input_style,
+                    ),
+                    style=cell_border,
+                ),
+            ],
+            style={"line-height": "15px"},
+        )
+
+    logger.debug(settings_json)
+    logger.debug(settings_json["layout_buttons"])
+    children = [
+        html.Div(children=[html.Label(item["text"]), dcc.Input()])
+        for key, item in settings_json["layout_buttons"].items()
+    ]
+    children = [
+        mk_row(item["text"]) for key, item in settings_json["layout_buttons"].items()
+    ]
+    header = [
+        html.Tr(
+            children=[
+                html.Td(
+                    "Element",
+                    style={
+                        "border": "none",
+                        "font-size": "14px",
+                        "font-weight": "bold",
+                    },
+                ),
+                html.Td(
+                    "Key to bind",
+                    style={
+                        "border": "none",
+                        "font-size": "14px",
+                        "font-weight": "bold",
+                    },
+                ),
+            ]
+        ),
+    ]
+    children = header + children
+
+    # rows = html.Tr([html.Td(), html.Td(dcc.Input(placeholder="Give keycode"))])
+    keybinds = html.Div(
+        [
+            # Input to bind keys to specific actions
+            html.Div(
+                [
+                    html.Div(
+                        children=html.Table(
+                            *[children],
+                            style={"border-collapse": "collapse"},
+                        )
+                    ),
+                ]
+            ),
+            # Storage for bindings
+            dcc.Store(id="key-bindings", data={}),
+            # Actions
+        ]
+    )
     page = html.Div(
         [
             html.H1("Settings Page"),
