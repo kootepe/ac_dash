@@ -76,8 +76,16 @@ logger = logging.getLogger("defaultLogger")
 def mk_binds(settings):
     binds = []
     for key, elem in settings.items():
+        key_str = f"""{{"index":"{elem}","type":"logic-button"}}"""
+        if elem == "next-button":
+            key_str = elem
+        if elem == "prev-button":
+            key_str = elem
+
+        # document.getElementById('{elem}').click()
+        # document.getElementById('{key_str}').click()
         bind = f"""if (event.key == '{key}') {{
-                document.getElementById('{elem}').click()
+    document.getElementById('{key_str}').click()
             }}\n"""
         binds.append(bind)
     binds_js = "".join(binds)
@@ -103,15 +111,36 @@ def register_callbacks(
     settings,
 ):
     # bind h and l to previous and next buttons
+    keybinds = settings["settings"]["keybinds"]
     app.clientside_callback(
         mk_binds(settings["settings"]["keybinds"]),
-        *[Output(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
-        # [[State(graph_name, "relayoutData") for graph_name in graph_names[1]]],
-        # Output("prev-button", "id"),
-        # Output("next-button", "id"),
-        *[Input(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
-        # Input("prev-button", "id"),
-        # Input("next-button", "id"),
+        # *[Output(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
+        # *[
+        #     Output(elem, "id")
+        #     for key, elem in keybinds.items()
+        #     if elem in ["prev-button", "next-button"]
+        # ],
+        *[
+            Output(elem, "id")
+            for key, elem in keybinds.items()
+            if elem in ["prev-button", "next-button"]
+        ],
+        *[
+            Output({"type": "logic-button", "index": elem}, "id")
+            for key, elem in keybinds.items()
+            if elem not in ["prev-button", "next-button"]
+        ],
+        *[
+            Input(elem, "id")
+            for key, elem in keybinds.items()
+            if elem in ["prev-button", "next-button"]
+        ],
+        *[
+            Input({"type": "logic-button", "index": elem}, "id")
+            for key, elem in keybinds.items()
+            if elem not in ["prev-button", "next-button"]
+        ],
+        # *[Input(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
     )
 
     @app.callback(
