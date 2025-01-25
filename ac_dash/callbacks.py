@@ -753,7 +753,9 @@ def register_callbacks(
         current = measurements[measurements["start_time"] == index].index[0]
         formatted = f"{current+1:5}"
         html = formatted.replace(" ", "\u00a0")
-        info_text = f"{html}/{all_meas} {str(measurement)}"
+        all_meas = f"{all_meas+1:5}"
+        all_meas = all_meas.replace(" ", "\u00a0")
+        info_text = f"#{html}/{all_meas}     {str(measurement)}".replace(" ", "\u00a0")
         return (
             figs,
             attr_plots,
