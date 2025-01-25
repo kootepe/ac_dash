@@ -32,6 +32,8 @@ class Flux(db.Model):
     CH4_offset_e = db.Column(db.Integer, nullable=True)
     CO2_offset_s = db.Column(db.Integer, nullable=True)
     CO2_offset_e = db.Column(db.Integer, nullable=True)
+    N2O_offset_s = db.Column(db.Integer, nullable=True)
+    N2O_offset_e = db.Column(db.Integer, nullable=True)
     close_offset = db.Column(db.Integer, nullable=True)
     open_offset = db.Column(db.Integer, nullable=True)
     end_offset = db.Column(db.Integer, nullable=True)
