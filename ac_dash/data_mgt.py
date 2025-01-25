@@ -270,7 +270,7 @@ def delete_fluxes(start, end):
         conn.execute(delete_st)
 
 
-def flux_range_to_df(start, end, chamber_ids, is_valid=None):
+def flux_range_to_df(start, end, chamber_ids, is_valid=None, serial=None):
     logger.info(start)
     logger.info(end)
     select_st = select(Flux_tbl).where(
@@ -278,6 +278,8 @@ def flux_range_to_df(start, end, chamber_ids, is_valid=None):
         Flux_tbl.c.start_time <= end,
         Flux_tbl.c.chamber_id.in_(chamber_ids),
     )
+    if serial is not None:
+        select_st = select_st.where(Flux_tbl.c.instrument_serial == serial)
     if is_valid is not None:
         select_st = select_st.where(Flux_tbl.c.is_valid == is_valid)
     select_st = select_st.order_by(Flux_tbl.c.start_time.asc())

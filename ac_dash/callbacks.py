@@ -648,7 +648,7 @@ def register_callbacks(
         # Input("add-time", "n_clicks"),
         # Input("substract-time", "n_clicks"),
         Input("parse-range", "n_clicks"),
-        State("used-instrument-select", "value"),
+        Input("used-instrument-select", "value"),
         prevent_initial_call=True,
     )
     def update_graph(*args):

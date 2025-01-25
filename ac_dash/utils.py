@@ -319,19 +319,25 @@ def handle_triggers(args, all_chambers, graph_names):
     if skip_invalid and skip_valid:
         skips = None
 
-    if ctx.triggered_id == "parse-range":
-        point_data = flux_range_to_df(start_date, end_date, selected_chambers, skips)
+    if isinstance(ctx.triggered_id, dict):
+        triggered_elem = ctx.triggered_id["index"]
+    else:
+        triggered_elem = ctx.triggered_id if ctx.triggered else None
+
+    selected_instrument = json.loads(selected_instrument)
+    first_key = next(iter(selected_instrument))
+    serial = selected_instrument[first_key]["serial"]
+
+    if triggered_elem == "parse-range" or triggered_elem == "used-instrument-select":
+        point_data = flux_range_to_df(
+            start_date, end_date, selected_chambers, skips, serial
+        )
         if point_data.empty:
             return None, None, point_data, None, None, None
 
         index = pd.to_datetime(point_data["start_time"].iloc[0])
         if len(point_data) == 0 and point_data.empty:
             return None, None, point_data, None, None, None
-
-    if isinstance(ctx.triggered_id, dict):
-        triggered_elem = ctx.triggered_id["index"]
-    else:
-        triggered_elem = ctx.triggered_id if ctx.triggered else None
 
     logger.debug(selected_chambers)
     logger.debug(all_chambers)
