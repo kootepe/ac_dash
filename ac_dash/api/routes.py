@@ -110,13 +110,18 @@ class GasApi(Resource):
         # check for zero lengt files
         file_length = file.seek(0, os.SEEK_END)
         file.seek(0, os.SEEK_SET)
+
+        if file.filename == "":
+            return {"message": "No selected file"}, 400
+
         if file_length < 10:
             return {"message": f"No data in file {file.filename}"}, 400
 
         instrument = request.form.get("instrument", None)
         serial = request.form.get("serial", None)
+
         # try and read the first two rows of the file for model and serial
-        if not instrument:
+        if not instrument or not serial:
             file.stream.seek(0)
             reader = csv.reader(file.stream.read().decode("utf-8").splitlines())
             rows = {}
@@ -125,34 +130,36 @@ class GasApi(Resource):
                 rows[row_data[0]] = row_data[1]
                 if i == 1:
                     break
-            instrument = rows.get("Model:").replace("-", "")
+            instrument_class = rows.get("Model:").replace("-", "")
             serial = rows.get("SN:")
             file.stream.seek(0)
 
-        # Check if the file has a valid filename
-        if file.filename == "":
-            return {"message": "No selected file"}, 400
+        # BUG: this doesnt fail gracefully
+        if instrument is None:
+            return {"message": "Provide instrument"}, 400
+        if serial is None:
+            return {"message": "Provide instrument serial"}, 400
 
-        file_reader = instruments.get(instrument, None)(serial)
+        instrument_class = instrument.replace("-", "")
+        file_reader = instruments.get(instrument_class, None)
+
+        if not file_reader:
+            return {"message": "Provide proper instrument details"}, 400
+
+        file_reader = file_reader(serial)
+
         try:
+            row_count, in_rows = 0, 0
             file_exts = ("csv", "DATA", "DAT", "data")
             if file.filename.split(".")[-1] in file_exts:
                 df = process_measurement_file(file, file_reader)
-                df["instrument_serial"] = file_reader.serial
-                df["instrument_model"] = file_reader.model
+                df = self._process_dataframe(df, file_reader)
+
                 in_rows = len(df)
-                df["datetime"] = (
-                    df["datetime"]
-                    .dt.tz_localize("Europe/Helsinki", ambiguous=True)
-                    .dt.tz_convert("UTC")
-                )
 
                 pushed_data, dupes = df_to_gas_table(df)
                 logger.debug(pushed_data)
-                if pushed_data.empty:
-                    row_count = 0
-                else:
-                    row_count = len(pushed_data)
+                row_count = len(pushed_data) if not pushed_data.empty else 0
 
             if "zip" in file.filename:
                 logger.debug("Process zip")
@@ -177,6 +184,19 @@ class GasApi(Resource):
             }, 200
         except Exception as e:
             return {"message": f"Unable to parse {file}, exception: {e}"}, 500
+
+    def _process_dataframe(self, df, file_reader):
+        """
+        Process the DataFrame by adding instrument details and converting timestamps.
+        """
+        df["instrument_serial"] = file_reader.serial
+        df["instrument_model"] = file_reader.model
+        df["datetime"] = (
+            df["datetime"]
+            .dt.tz_localize("Europe/Helsinki", ambiguous=True)
+            .dt.tz_convert("UTC")
+        )
+        return df
 
 
 class CycleApi(Resource):
