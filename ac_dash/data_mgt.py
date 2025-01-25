@@ -40,7 +40,6 @@ class Flux(db.Model):
     air_temperature = db.Column(db.Float, nullable=True)
     chamber_height = db.Column(db.Float, nullable=True)
     lagtime = db.Column(db.Integer, nullable=True)
-    r_std = db.Column(db.Float, nullable=True)
     quality_r = db.Column(db.Float, nullable=True)
     quality_r2 = db.Column(db.Float, nullable=True)
 

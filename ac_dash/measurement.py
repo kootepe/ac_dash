@@ -107,7 +107,6 @@ class MeasurementCycle:
         self.calc_offset_s = {gas: 0 for gas in self.flux_gases}
         self.calc_offset_e = {gas: 0 for gas in self.flux_gases}
 
-        self.r_std = 0
         self.quality_r = 1
         self.quality_r2 = 1
         self.get_max(conn=conn)
@@ -325,7 +324,6 @@ class MeasurementCycle:
             "air_pressure": self.air_pressure,
             "air_temperature": self.air_temperature,
             "lagtime": self.lagtime,
-            "r_std": float(self.r_std),
             "quality_r": float(self.quality_r),
             "quality_r2": float(self.quality_r2),
             "is_valid": self._is_valid,
@@ -392,7 +390,6 @@ class MeasurementCycle:
         self.end_offset = vals.get("end_offset")
         self.air_pressure = vals.get("air_pressure")
         self.air_temperature = vals.get("air_temperature")
-        self.r_std = vals.get("r_std")
         self.quality_r = vals.get("quality_r")
         self.quality_r2 = vals.get("quality_r2")
         self._is_valid = bool(vals.get("is_valid"))
@@ -521,14 +518,10 @@ class MeasurementCycle:
 
         # calculate std of all calculated ch4 r values to drop bad measurements
         r_vals = np.array(self.all_r_ch4)
-        self.r_std = np.std(r_vals)
-        if not self.r_std:
-            self.r_std = 0
 
         self.error_code = 0
         self.error_code += check_valid_deferred(self)
         logger.info(self.error_code)
-        logger.debug(f"r_std: {self.r_std}")
 
     def get_lagtime(self):
         if self.has_errors is True:
@@ -617,6 +610,7 @@ class MeasurementCycle:
         else:
             slope = calculate_slope(data.index.astype(int) // 10**9, data[gas])
             r = calculate_pearsons_r(data.index.view(int), data[gas])
+            logger.debug(self.calc_data)
             flux = calculate_gas_flux(self, gas, slope, self.chamber_height)
             if gas == "CH4":
                 start, end = get_datetime_index(
@@ -751,15 +745,14 @@ class MeasurementCycle:
         logger.debug(
             f"Max R: {max_r}, Offset Start: {max_r_offset_s}, Offset End: {max_r_offset_e}"
         )
+        logger.debug(max_r_offset_e)
+        logger.debug(max_r_offset_s)
         logger.debug(f"Calculated {len(all_r)} values of r.")
 
         self.r[gas] = max_r
         self.r2[gas] = max_r**2
         self.calc_offset_s[gas] = max_r_offset_s
         self.calc_offset_e[gas] = max_r_offset_e
-
-        if gas == "CH4":
-            self.all_r_ch4 = sorted(all_r)
 
     def calculate_r(self, gas):
         self.s = self.start_time + pd.Timedelta(seconds=self.calc_offset_s.get(gas))

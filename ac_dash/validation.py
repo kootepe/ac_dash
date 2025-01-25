@@ -10,7 +10,7 @@ error_codes = {
     8: "no air_pressure",
     16: "too many measurements",
     32: "too few measurements",
-    64: "high r std",
+    64: "low r2",
     128: "improper close",
     256: "few unique values",
     512: "null gas measurements",
@@ -25,10 +25,10 @@ error_codes = {
 }
 
 
-def check_r_std(r_std):
-    std_threshold = 0.13
-    logger.debug(f"r_std: {r_std}")
-    return r_std > std_threshold
+def check_quality_r2(r2):
+    r2_threshold = 0.93
+    logger.debug(f"r2: {r2}")
+    return r2_threshold > r2
 
 
 def check_nunique(data):
@@ -162,7 +162,7 @@ def check_valid_deferred(measurement, device=None):
     too_many = check_too_many(data, measurement_time)
     too_few = check_too_few(data, measurement_time)
     few_nunique = check_nunique(data["CH4"])
-    high_r_std = check_r_std(measurement.r_std)
+    low_r2 = check_quality_r2(measurement.quality_r2)
     missing_gas = check_gas_measurement(measurement)
 
     checks_val = 0
@@ -172,7 +172,7 @@ def check_valid_deferred(measurement, device=None):
         or too_many
         or too_few
         or few_nunique
-        or high_r_std
+        or low_r2
         or didnt_close
     ):
         if has_errors:
@@ -188,9 +188,9 @@ def check_valid_deferred(measurement, device=None):
         if too_few:
             checks_val += 32
             logger.debug("too few measurements,")
-        if high_r_std:
+        if low_r2:
             checks_val += 64
-            logger.debug("high r_std")
+        logger.debug("low r2")
         if didnt_close:
             checks_val += 128
             logger.debug("didnt close properly")
