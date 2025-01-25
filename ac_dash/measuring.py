@@ -275,15 +275,76 @@ class LI7820_reduced(Instrument):
         return f"{self.model}, {self.serial}"
 
 
+class LIcustom(Instrument):
+    """
+    Implementation for LI-COR LI-7820 gas analyzer.
+
+    Attributes
+    ----------
+    gases : list
+    List of measured gases
+
+    units : dict
+    Dictionary of measured gases and their units
+
+    """
+
+    def __init__(self, serial):
+        model = "LI-custom"
+        super().__init__(model, serial)
+        self._gases = ["CH4", "CO2", "N2O", "H2O"]
+        self._flux_gases = ["CH4", "CO2", "N2O"]
+        self._units = {"CO2": "ppm", "CH4": "ppb", "H2O": "ppm", "N2O": "ppb"}
+        self.pd_kwargs = {
+            "sep": ",",
+            "dtype": {
+                "N2O": "float",
+                "H2O": "float",
+                "CH4": "float",
+                "CO2": "float",
+                "DATETIME": "str",
+                "DIAG": "int",
+            },
+            # "index_col": "datetime",
+            # pandas will combine these columns and parse the dates with
+            # date_fromat
+            # "parse_dates": {"datetime": ["DATE", "TIME"]},
+            # "date_format": "%Y-%m-%d %H:%M:%S",
+        }
+        self.diag_col = "DIAG"
+
+    @property
+    def gases(self):
+        return self._gases
+
+    @property
+    def flux_gases(self):
+        return self._flux_gases
+
+    @property
+    def units(self):
+        return self._units
+
+    def read_output_file(self, file_path):
+        df = pd.read_csv(file_path, **self.pd_kwargs)
+        df["datetime"] = pd.to_datetime(df["datetime"], format="ISO8601")
+        return df
+
+    def __repr__(self):
+        return f"{self.model}, {self.serial}"
+
+
 instruments = {
     "LI7810": LI7810,
     "LI7810_reduced": LI7810_reduced,
     "LI7820": LI7820,
     "LI7820_reduced": LI7820_reduced,
+    "LIcustom": LIcustom,
 }
 class_model_key = {
     "LI7810": "LI-7810",
     "LI7810_reduced": "LI-7810",
     "LI7820": "LI-7820",
     "LI7820_reduced": "LI-7820",
+    "LIcustom": "LI-custom",
 }
