@@ -532,10 +532,16 @@ def execute_actions(triggered_id, measurement, measurements, date_range):
         logger.debug(measurement.attribute_df.to_dict())
         push_single_point(measurement)
 
-    if triggered_id == "mark-valid":
-        logger.debug("mark-valid clicked.")
-        measurement.is_valid_manual = True
-        logger.debug(measurement.attribute_df.to_dict())
+    if triggered_id == "toggle-valid":
+        logger.debug("toggle-valid clicked.")
+        logger.info(measurement.is_valid)
+        logger.info(measurement.is_valid_manual)
+        if measurement.is_valid is True:
+            measurement.is_valid_manual = False
+        else:
+            measurement.is_valid_manual = True
+        logger.info(measurement.is_valid)
+        logger.info(measurement.is_valid_manual)
         push_single_point(measurement)
     if triggered_id == "reset-cycle":
         logger.debug("reset-cycle clicked.")
