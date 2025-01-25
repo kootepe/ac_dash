@@ -144,10 +144,10 @@ def register_callbacks(
     )
 
     @app.callback(
-        Output("used-instrument-select", "options"),
+        # Output("used-instrument-select", "options"),
         Input("instrument-init", "id"),
     )
-    def init_data():
+    def init_data(test):
         get_distinct_instrument()
         pass
 
