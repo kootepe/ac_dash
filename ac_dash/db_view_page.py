@@ -3,8 +3,9 @@ from .data_mgt import Flux_tbl
 
 
 def mk_db_view_page(columns=None):
+    all_cols = [column.name for column in Flux_tbl.columns]
     if columns is None:
-        columns = [column.name for column in Flux_tbl.columns]
+        columns = all_cols
     page = html.Div(
         [
             html.Div(
@@ -27,7 +28,7 @@ def mk_db_view_page(columns=None):
                                             id="column-selector",
                                             options=[
                                                 {"label": col, "value": col}
-                                                for col in columns
+                                                for col in all_cols
                                             ],
                                             value=list(columns),
                                             multi=True,

@@ -59,7 +59,7 @@ from .layout import (
     graph_style,
 )
 from .db_view_page import mk_db_view_page
-from .data_mgt import Cycle_tbl
+from .data_mgt import Cycle_tbl, Flux_tbl
 from .data_init import (
     read_gas_init_input,
     read_cycle_init_input,
@@ -449,15 +449,17 @@ def register_callbacks(
         Output("meteo-db-tab", "children"),
         # Output("flux-table-col-store", "data", allow_duplicate=True),
         Input("db-view-tabs", "value"),
-        State("flux-table-col-store", "data"),
+        Input("flux-table-col-store", "data"),
         State("column-selector", "value"),
         prevent_initial_call=True,
     )
     def populate_db_views(tab, col_store, current_cols):
-        table_cols = [{"label": col, "value": col} for col in col_store]
+        table_cols = [
+            {"label": col.name, "value": col.name} for col in Flux_tbl.columns
+        ]
         logger.info(tab)
         if tab == "flux-db-tab":
-            df = flux_table_to_df()
+            df = flux_table_to_df(col_store)
             col_select = dcc.Dropdown(
                 id="column-selector",
                 options=table_cols,
