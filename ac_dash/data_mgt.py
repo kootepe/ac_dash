@@ -432,7 +432,7 @@ def get_distinct_meteo_source():
     return distinct_values
 
 
-def get_single_meteo(timestamp):
+def get_single_meteo(timestamp, source=None):
     logger.debug("Running get single temp")
     # select_st = select(Meteo_tbl).where(
     #     Meteo_tbl.c.datetime >= (start - pd.Timedelta(days=1)),
@@ -447,11 +447,16 @@ def get_single_meteo(timestamp):
     query = f"""
             SELECT *
             FROM meteo_table
-            WHERE datetime BETWEEN TIMESTAMP '{start}' 
-                                        AND TIMESTAMP '{end}'
-            ORDER BY ABS(EXTRACT(EPOCH FROM (datetime - TIMESTAMP '{start}')))
-            LIMIT 1;
-            """
+            WHERE datetime BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}'"""
+
+    if source is not None:
+        query += f" AND source = '{source}'"
+
+    # Add the ORDER BY and LIMIT clauses
+    query += f"""
+        ORDER BY ABS(EXTRACT(EPOCH FROM (datetime - TIMESTAMP '{start}')))
+        LIMIT 1;
+    """
     df = pd.read_sql_query(query, engine)
     if df is None or df.empty:
         return None, None
