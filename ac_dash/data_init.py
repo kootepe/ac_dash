@@ -157,7 +157,7 @@ def read_meteo_init_input(source, contents, filename):
         return f"Exception {e}", ""
 
 
-def init_flux(init, start, end, triggered_elem):
+def init_flux(init, start, end):
     logger.info("Initiating")
     if start is None:
         return "Give start date"
@@ -171,16 +171,15 @@ def init_flux(init, start, end, triggered_elem):
     fluxes = flux_table_to_df()
     dupes = set(fluxes["start_time"])
     logger.debug(fluxes)
-    if triggered_elem == "init-flux":
-        with engine.connect() as conn:
-            df = cycle_table_to_df(start, end, conn)
-            if df.empty or df is None:
-                return f"No cycles between {start} and {end}."
-            logger.debug(df)
-            df = df[~df["start_time"].isin(dupes)]
-            df.sort_values("start_time", inplace=True)
-            logger.debug(df)
-            init_from_cycle_table(df, None, None, conn)
+    with engine.connect() as conn:
+        df = cycle_table_to_df(start, end, conn)
+        if df.empty or df is None:
+            return f"No cycles between {start} and {end}."
+        logger.debug(df)
+        df = df[~df["start_time"].isin(dupes)]
+        df.sort_values("start_time", inplace=True)
+        logger.debug(df)
+        init_from_cycle_table(df, None, None, conn)
 
 
 def read_volume_init_input(contents, filename):
