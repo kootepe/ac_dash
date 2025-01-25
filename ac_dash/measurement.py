@@ -420,8 +420,12 @@ class MeasurementCycle:
             "calc_offset_e",
             {f"{gas}": vals.get(f"{gas}_offset_e") for gas in self.flux_gases},
         )
-        self.data = gas_table_to_df(self.start_time, self.end)
-        self.calc_data = gas_table_to_df(self.close, self.open)
+        self.data = gas_table_to_df(
+            self.start_time, self.end, serial=self.instrument.serial, conn=conn
+        )
+        self.calc_data = gas_table_to_df(
+            self.close, self.open, serial=self.instrument.serial, conn=conn
+        )
         self.check_no_data()
 
         # logger.debug(self.data)
@@ -472,7 +476,9 @@ class MeasurementCycle:
     def get_data(self, ifdb_dict, conn=None):
         if self.data is None or self.data.empty:
             logger.debug(f"Getting data from {self.start_time} to {self.end}")
-            self.data = gas_table_to_df(self.start_time, self.end, conn)
+            self.data = gas_table_to_df(
+                self.start_time, self.end, self.instrument.serial, conn
+            )
             if self.data is None or self.data.empty:
                 return
             logger.debug(f"Data length {len(self.data)}")

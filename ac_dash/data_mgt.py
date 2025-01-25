@@ -316,7 +316,7 @@ def mk_gas_table():
 
 
 # NOTE: move this down
-def gas_table_to_df(start=None, end=None, conn=None):
+def gas_table_to_df(start=None, end=None, serial=None, conn=None):
     if start is None:
         start = pd.to_datetime("1970-01-01", format="ISO8601")
     if end is None:
@@ -324,6 +324,8 @@ def gas_table_to_df(start=None, end=None, conn=None):
     select_st = select(Gas_tbl).where(
         Gas_tbl.c.datetime >= start, Gas_tbl.c.datetime <= end
     )
+    if serial is not None:
+        select_st = select_st.where(Gas_tbl.c.instrument_serial == serial)
     if conn:
         df = pd.read_sql(select_st, conn)
         df.set_index("datetime", inplace=True)
