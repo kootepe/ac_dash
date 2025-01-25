@@ -169,9 +169,12 @@ def load_config():
     filepath = os.path.abspath(os.path.dirname(__file__))
     with open(f"{filepath}/config/config.json", "r") as f:
         defaults = json.load(f)
+    print(defaults)
     with open(f"{filepath}/config/custom.json", "r") as f:
         custom = json.load(f)
+    print(custom)
     config = {**defaults, **custom}
+    print(config)
     return (
         config["chambers"],
         config["chamber_map"],
@@ -274,24 +277,25 @@ def handle_triggers(args, all_chambers, graph_names):
         gas_relays,
         date_range,
         stored_settings,
+        buttons,
         prev_clicks,
         next_clicks,
         skip_invalid,
         skip_valid,
-        del_lagtime,
-        push_all,
-        push_one,
+        # del_lagtime,
+        # push_all,
+        # push_one,
         selected_chambers,
         index,
         chamber,
-        mark_invalid,
-        mark_valid,
-        reset_cycle,
-        reset_index,
-        max_r,
-        run_init,
-        add_time,
-        substract_time,
+        # mark_invalid,
+        # mark_valid,
+        # reset_cycle,
+        # reset_index,
+        # max_r,
+        # run_init,
+        # add_time,
+        # substract_time,
         parse_range,
         selected_instrument,
     ) = args
@@ -305,6 +309,7 @@ def handle_triggers(args, all_chambers, graph_names):
     logger.info(f"Triggered key: {ctx.triggered_id}")
     logger.debug(f"Start date: {start_date}.")
     selected_chambers = selected_chambers or all_chambers
+    print(buttons)
 
     skips = None
     if skip_invalid:
