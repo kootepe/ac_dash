@@ -1,3 +1,4 @@
+import json
 import io
 import base64
 import logging
@@ -26,7 +27,6 @@ logger = logging.getLogger("defaultLogger")
 
 def read_gas_init_input(use_class, serial, model, contents, filename):
     """Read data passed from the settings page"""
-    # global instruments
     if serial is None or model is None:
         return "Select instrument or fill in instrument details", ""
     content_type, content_str = contents.split(",")
@@ -157,7 +157,9 @@ def read_meteo_init_input(source, contents, filename):
         return f"Exception {e}", ""
 
 
-def init_flux(init, start, end):
+def init_flux(init, start, end, instrument, meteo):
+    logger.debug(instrument)
+    logger.debug(meteo)
     logger.info("Initiating")
     if start is None:
         return "Give start date"
@@ -179,7 +181,12 @@ def init_flux(init, start, end):
         df = df[~df["start_time"].isin(dupes)]
         df.sort_values("start_time", inplace=True)
         logger.debug(df)
-        init_from_cycle_table(df, None, None, conn)
+        instrument = json.loads(instrument)
+        first_key = next(iter(instrument))
+        serial = instrument[first_key]["serial"]
+        use_class = instrument[first_key]["class"]
+        instrument = instruments.get(use_class)(serial)
+        init_from_cycle_table(df, serial=serial, use_class=use_class, conn=conn)
 
 
 def read_volume_init_input(contents, filename):
