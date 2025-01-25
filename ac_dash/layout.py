@@ -1,12 +1,10 @@
-from plotly.graph_objs import Figure
 from dash import dcc, html
 from datetime import date
 from datetime import timedelta
-import pandas as pd
 import logging
 import json
 
-from .settings_tabs import data_init_tabs, upload_instruments
+from .settings_tabs import data_init_tabs
 from .data_mgt import Flux_tbl, get_distinct_instrument
 
 columns = [column.name for column in Flux_tbl.columns]
@@ -20,7 +18,7 @@ logger = logging.getLogger("defaultLogger")
 
 graph_style = {
     "height": "15vw",
-    "width": "45vw",
+    "width": "50vw",
     "max-height": "300px",
     "max-width": "900px",
 }
@@ -40,7 +38,7 @@ upload_style = style = {
 }
 
 
-def mk_main_page(left_settings, right_settings, instruments):
+def mk_main_page(left_settings, right_settings, instruments, settings):
     serials = get_distinct_instrument()
     found = {}
     for serial in serials:
@@ -103,8 +101,6 @@ def mk_main_page(left_settings, right_settings, instruments):
                     html.Button("Use range", id="parse-range"),
                 ]
             ),
-            html.Button("Previous", id="prev-button", n_clicks=0),
-            html.Button("Next", id="next-button", n_clicks=0),
             html.Div([dcc.Checklist(id="chamber-select")], id="chamber-buttons"),
             html.Div(
                 [
@@ -139,29 +135,46 @@ def mk_main_page(left_settings, right_settings, instruments):
                 ]
             ),
             html.Div(
+                children=[
+                    html.Div(
+                        [
+                            html.Button("Previous", id="prev-button", n_clicks=0),
+                            html.Button("Next", id="next-button", n_clicks=0),
+                        ]
+                    ),
+                    *[
+                        html.Button(
+                            item["text"],
+                            id={"type": "logic-button", "index": key},
+                            n_clicks=0,
+                            style={"padding": "1px"},
+                        )
+                        for key, item in settings["layout_buttons"].items()
+                    ],
+                ],
+                # [
+                #     html.Button("Delete lagtime", id="del-lagtime", n_clicks=0),
+                #     html.Button("Guess lagtime", id="max-r", n_clicks=0),
+                #     html.Button("Push all", id="push-all", n_clicks=0),
+                #     html.Button("Push current point", id="push-single", n_clicks=0),
+                #     html.Button("Mark invalid", id="mark-invalid", n_clicks=0),
+                #     html.Button("Mark valid", id="mark-valid", n_clicks=0),
+                #     html.Button("Reset open and close", id="reset-cycle", n_clicks=0),
+                #     html.Button("Jump to beginning", id="reset-index", n_clicks=0),
+                #     html.Button("Reset the app", id="run-init", n_clicks=0),
+                #     html.Button("Recalculate", id="run-recalc", n_clicks=0),
+                #     html.Button("Add 2min", id="add-time", n_clicks=0),
+                #     html.Button("Substract 2min", id="substract-time", n_clicks=0),
+                # ],
+                style={"margin": "5px"},
+            ),
+            html.Div(
                 id="measurement-info",
                 style={
                     "font-family": "monospace",
                     "font-size": "14px",
-                    "padding": "20px 0",
+                    "padding": "5px 0",
                 },
-            ),
-            html.Div(
-                [
-                    html.Button("Delete lagtime", id="del-lagtime", n_clicks=0),
-                    html.Button("Guess lagtime", id="max-r", n_clicks=0),
-                    html.Button("Push all", id="push-all", n_clicks=0),
-                    html.Button("Push current point", id="push-single", n_clicks=0),
-                    html.Button("Mark invalid", id="mark-invalid", n_clicks=0),
-                    html.Button("Mark valid", id="mark-valid", n_clicks=0),
-                    html.Button("Reset open and close", id="reset-cycle", n_clicks=0),
-                    html.Button("Jump to beginning", id="reset-index", n_clicks=0),
-                    html.Button("Reset the app", id="run-init", n_clicks=0),
-                    html.Button("Recalculate", id="run-recalc", n_clicks=0),
-                    html.Button("Add 2min", id="add-time", n_clicks=0),
-                    html.Button("Substract 2min", id="substract-time", n_clicks=0),
-                ],
-                style={"margin-bottom": "10px"},
             ),
             html.Div(
                 [
