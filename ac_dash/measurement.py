@@ -551,7 +551,7 @@ class MeasurementCycle:
             lagtime_idx = self.find_negative_lagtime(data, lagtime_idx, 10)
             logger.debug(lagtime_idx)
 
-        self.lagtime = (lagtime_idx - self.og_open).total_seconds()
+        self.lagtime = int((lagtime_idx - self.og_open).total_seconds())
 
     def find_negative_lagtime(self, data, lagtime_idx, back=0):
         logger.debug("Trying to find negative lagtime")
