@@ -344,6 +344,19 @@ def register_callbacks(
         prevent_initial_call=True,
     )
     def init_flux_callback(init, start, end, instrument, meteo):
+        if instrument is None:
+            return "Select used instrument"
+        if meteo is None:
+            return "Select meteo source"
+        if start is None:
+            return "Give start date"
+        if end is None:
+            return "Give end date"
+        try:
+            pd.to_datetime(start, format="%Y-%m-%d")
+            pd.to_datetime(end, format="%Y-%m-%d")
+        except Exception:
+            return "give YYYY-MM-DD date"
         warn = init_flux(init, start, end, instrument, meteo)
         return warn
 

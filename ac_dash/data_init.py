@@ -158,18 +158,24 @@ def read_meteo_init_input(source, contents, filename):
 
 
 def init_flux(init, start, end, instrument, meteo):
-    logger.debug(instrument)
-    logger.debug(meteo)
-    logger.info("Initiating")
+    if instrument is None:
+        return "Select used instrument"
+    if meteo is None:
+        return "Select meteo source"
     if start is None:
         return "Give start date"
     if end is None:
         return "Give end date"
     try:
-        pd.to_datetime(start, format="%Y-%m-%d")
-        pd.to_datetime(end, format="%Y-%m-%d")
+        pd.to_datetime(start, format="%Y-%m-%d", errors="raise")
+        pd.to_datetime(end, format="%Y-%m-%d", errors="raise")
     except Exception:
         return "give YYYY-MM-DD date"
+    print(start)
+    print(end)
+    print(instrument)
+    print(meteo)
+    logger.info("Initiating")
     fluxes = flux_table_to_df()
     dupes = set(fluxes["start_time"])
     logger.debug(fluxes)
