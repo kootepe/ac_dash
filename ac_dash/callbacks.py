@@ -286,18 +286,6 @@ def register_callbacks(
             )
 
     @app.callback(
-        Output("init-flux-warn", "children"),
-        Input("init-flux", "n_clicks"),
-        State("init-start", "value"),
-        State("init-end", "value"),
-        prevent_initial_call=True,
-    )
-    def init_flux_callback(init, start, end):
-        elem = ctx.triggered_id
-        warn = init_flux(init, start, end, elem)
-        return warn
-
-    @app.callback(
         Output("model-input-warn", "children"),
         Output("model-input-show", "children"),
         State("class-input", "value"),
@@ -345,6 +333,18 @@ def register_callbacks(
     def volume_init_callback(source, contents, filename):
         warn, show = read_volume_init_input(source, contents, filename)
         return warn, show
+
+    @app.callback(
+        Output("init-flux-warn", "children"),
+        Input("init-flux", "n_clicks"),
+        State("init-start", "value"),
+        State("init-end", "value"),
+        State("flux-init-meteo-source", "value"),
+        prevent_initial_call=True,
+    )
+    def init_flux_callback(init, start, end):
+        warn = init_flux(init, start, end)
+        return warn
 
     @app.callback(Output("graph-div", "children"), Input("settings-store", "data"))
     def mk_display_graphs(settings):
