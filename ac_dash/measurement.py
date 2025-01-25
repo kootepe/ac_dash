@@ -838,6 +838,7 @@ class MeasurementCycle:
         layout = go.Layout(
             title={
                 "text": f"Chamber {self.id} {gas} Measurement {self.start_time}",
+                "font": {"family": "monospace", "size": 14},
             },
             margin=dict(
                 l=10,
