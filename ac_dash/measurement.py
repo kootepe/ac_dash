@@ -38,6 +38,7 @@ class MeasurementCycle:
         instrument,
         data=None,
         conn=None,
+        meteo_source=None,
     ):
         self.id = id
         self.instrument = instrument
@@ -82,7 +83,9 @@ class MeasurementCycle:
 
             return
         # BUG: this assumes that a row always has both temp and pressure
-        self.air_temperature, self.air_pressure = get_single_meteo(self.start_time)
+        self.air_temperature, self.air_pressure = get_single_meteo(
+            self.start_time, meteo_source
+        )
         self.chamber_height = get_single_volume(self.start_time)
         logger.debug("No flux in db")
 

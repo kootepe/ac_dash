@@ -298,6 +298,7 @@ def register_callbacks(app, chambers, in_measurements):
                 ctx.triggered_id.get("chamber_id"),
             )
             # pts = query_log_point(measurement, ifdb_dict)
+            pts = pd.DataFrame()
             old_pts = show_old_measurements(pts, role)
             return old_pts, ""
         if elem_type == "submit":

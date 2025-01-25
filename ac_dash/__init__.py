@@ -20,7 +20,11 @@ def mk_ac_plot(flask_app=None, url="/ac_dash/"):
     if flask_app is None:
         flask_app = Flask(__name__)
 
-    app = Dash(__name__, server=flask_app, url_base_pathname=url)
+    app = Dash(
+        __name__,
+        server=flask_app,
+        url_base_pathname=url,
+    )
     app.title = "Chamber validator"
     # auth = BasicAuth(app, users)
     protect_dash_app(flask_app, app)
