@@ -342,6 +342,15 @@ data_init_tabs = [
                                             id="init-flux-warn",
                                             style={"background-color": "salmon"},
                                         ),
+                                        html.Label(
+                                            "Select which instrument you are uploading data from"
+                                        ),
+                                        dcc.Dropdown(
+                                            options=instruments,
+                                            multi=False,
+                                            id="flux-init-instrument-select",
+                                            style={"width": "20vw"},
+                                        ),
                                         html.Div(
                                             [
                                                 html.Label("Select meteo source"),
