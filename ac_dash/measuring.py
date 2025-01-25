@@ -239,10 +239,10 @@ class LI7820_reduced(Instrument):
         self.pd_kwargs = {
             "sep": ",",
             "dtype": {
-                "N2O": "float",
-                "H2O": "float",
-                "DIAG": "int",
                 "datetime": "str",
+                "DIAG": "int",
+                "H2O": "float",
+                "N2O": "float",
             },
             # "index_col": "datetime",
             # pandas will combine these columns and parse the dates with
@@ -266,7 +266,10 @@ class LI7820_reduced(Instrument):
         return self._units
 
     def read_output_file(self, file_path):
-        return pd.read_csv(file_path, **self.pd_kwargs)
+        df = pd.read_csv(file_path, **self.pd_kwargs)
+        print(df)
+        df["datetime"] = pd.to_datetime(df["datetime"], format="ISO8601")
+        return df
 
     def __repr__(self):
         return f"{self.model}, {self.serial}"
