@@ -166,11 +166,15 @@ def fluxes_to_table(df):
 #     session.close()
 
 
-def flux_table_to_df():
+def flux_table_to_df(cols=None):
     # Query all records from the flux_table table
-    select_st = select(
-        Flux_tbl,
-    ).order_by(desc(Flux_tbl.c.start_time))
+    if cols is not None:
+        columns = [Flux_tbl.c[col] for col in cols]
+        select_st = select(*columns).order_by(desc(Flux_tbl.c.start_time))
+    else:
+        select_st = select(
+            Flux_tbl,
+        ).order_by(desc(Flux_tbl.c.start_time))
 
     with engine.connect() as conn:
         df = pd.read_sql(select_st, conn)
