@@ -128,12 +128,12 @@ class LI7810_reduced(Instrument):
                 "CO2": "float",
                 "H2O": "float",
                 "DIAG": "int",
-                "DATETIME": "str",
+                "datetime": "str",
             },
-            "index_col": "DATETIME",
+            # "index_col": "datetime",
             # pandas will combine these columns and parse the dates with
             # date_fromat
-            "parse_dates": ["DATETIME"],
+            "parse_dates": ["datetime"],
             "date_format": "%Y-%m-%d %H:%M:%S",
         }
         self.diag_col = "DIAG"
@@ -188,7 +188,7 @@ class LI7820(Instrument):
                 "TIME": "str",
                 "DIAG": "int",
             },
-            "index_col": "datetime",
+            # "index_col": "datetime",
             # pandas will combine these columns and parse the dates with
             # date_fromat
             "parse_dates": {"datetime": ["DATE", "TIME"]},
