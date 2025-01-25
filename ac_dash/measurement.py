@@ -214,12 +214,12 @@ class MeasurementCycle:
     def is_valid_manual(self, value):
         if isinstance(value, bool):
             self._is_valid_manual = value
-            logger.debug("Set is_valid to False")
             self._is_valid = value
-            if self.is_valid_manual is False:
+            if value is False:
                 self.error_code += 1024
-            if self.is_valid_manual is True:
+            if value is True:
                 self.error_code = 0
+            logger.info(f"set manual_is_valid to {value}")
 
         else:
             raise ValueError("is_valid_manual must be a boolean.")
