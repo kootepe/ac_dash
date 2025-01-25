@@ -320,7 +320,7 @@ def mk_settings_page(settings_elems, settings_json):
                     dcc.Tab(
                         label="General Settings",
                         children=[
-                            html.Div(all_settings, id="show-settings"),
+                            html.Div(settings_elems, id="show-settings"),
                             html.Div(
                                 [html.Button("Save settings", id="save-settings")]
                             ),
@@ -345,26 +345,6 @@ def mk_settings_page(settings_elems, settings_json):
     return page
 
 
-keybinds = html.Div(
-    [
-        html.H1("Key Press Binding Example"),
-        # Input to bind keys to specific actions
-        html.Div(
-            [
-                html.Label("Key to Bind: "),
-                dcc.Input(id="key-input", type="text", placeholder="Enter a key"),
-                html.Button("Bind Key", id="bind-button", n_clicks=0),
-                html.Div("Press a key and see the result", id="key-output"),
-            ]
-        ),
-        # Storage for bindings
-        dcc.Store(id="key-bindings", data={}),
-        # Actions
-        html.Div(id="action-output", children="Press a bound key to see an action."),
-    ]
-)
-
-
 def create_layout(layout_json, url):
     settings_json = layout_json["settings"]
     logger.debug("Creating layout.")
@@ -373,10 +353,13 @@ def create_layout(layout_json, url):
     instruments = layout_json["instruments"]
 
     all_settings, stored = mk_settings(settings_json)
-    settings_page = mk_settings_page(all_settings)
+    settings_page = mk_settings_page(all_settings, settings_json)
 
     main_page, graph_names, graphs = mk_main_page(
-        left_graphs, right_graphs, instruments
+        left_graphs,
+        right_graphs,
+        instruments,
+        settings_json,
     )
     stored["graph_names"] = graph_names
     stored["instruments"] = instruments
