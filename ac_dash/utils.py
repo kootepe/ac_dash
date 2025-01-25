@@ -467,9 +467,14 @@ def decrement_index(index, measurements):
     """Decrement the current index with wrap-around."""
     # Filter rows with datetime greater than target_datetime
     filtered_df = measurements[measurements["start_time"] < index]
-    # Get the row with the smallest datetime greater than target_datetime
-    next_row_index = filtered_df["start_time"].idxmax()
-    next_datetime = filtered_df.loc[next_row_index, "start_time"]
+    if not filtered_df.empty:
+        # Get the row with the smallest datetime greater than the current index
+        next_row_index = filtered_df["start_time"].idxmax()
+        next_datetime = filtered_df.loc[next_row_index, "start_time"]
+    else:
+        # Wrap around: get the smallest datetime in the DataFrame
+        next_datetime = measurements["start_time"].max()
+
     index = next_datetime
     return index
 
@@ -478,9 +483,14 @@ def increment_index(index, measurements):
     """Increment the current index with wrap-around."""
     # Filter rows with datetime greater than target_datetime
     filtered_df = measurements[measurements["start_time"] > index]
-    # Get the row with the smallest datetime greater than target_datetime
-    next_row_index = filtered_df["start_time"].idxmin()
-    next_datetime = filtered_df.loc[next_row_index, "start_time"]
+    if not filtered_df.empty:
+        # Get the row with the smallest datetime greater than the current index
+        next_row_index = filtered_df["start_time"].idxmin()
+        next_datetime = filtered_df.loc[next_row_index, "start_time"]
+    else:
+        # Wrap around: get the smallest datetime in the DataFrame
+        next_datetime = measurements["start_time"].min()
+
     index = next_datetime
     return index
 
