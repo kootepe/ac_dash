@@ -13,6 +13,8 @@ from ..data_mgt import (
     df_to_cycle_table,
     df_to_gas_table,
     df_to_meteo_table,
+    get_distinct_instrument,
+    get_distinct_meteo_source,
 )
 
 from ..utils import (
@@ -266,6 +268,26 @@ class InitFluxApi(Resource):
         json = request.get_json()
         start = json.get("start", None)
         end = json.get("end", None)
+        serial = json.get("instrument_serial", None)
+        meteo = json.get("meteo_source", None)
+        instruments = get_distinct_instrument()
+        sources = get_distinct_meteo_source()
+        if serial is None:
+            return {
+                "message": f"No instrument_serial given, options: {', '.join(instruments)}"
+            }
+        if serial not in instruments:
+            return {
+                "message": f"Instrument {serial} doesn't have associated gas measurements."
+            }
+
+        if meteo is None:
+            return {"message": f"No meteo_source given, options: {', '.join(sources)}"}
+        if meteo not in sources:
+            return {
+                "message": f"Meteo source {meteo} doesn't have associated meteo measurements."
+            }
+
         if start is None:
             return {"message": "No start date given."}
         if end is None:
