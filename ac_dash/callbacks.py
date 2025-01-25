@@ -424,7 +424,7 @@ def register_callbacks(
         logger.debug(settings_store)
         if pathname == f"{url}settings":
             page, _ = mk_settings(settings_store)
-            page = mk_settings_page(page)
+            page = mk_settings_page(page, settings_store)
             return page
         if pathname == f"{url}db_view":
             logger.info("Making db view")
@@ -436,6 +436,7 @@ def register_callbacks(
                 settings_store["gas_graphs"],
                 settings_store["attribute_graphs"],
                 settings_store["instruments"],
+                settings_store,
             )
             return page
 
