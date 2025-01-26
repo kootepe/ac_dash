@@ -14,6 +14,7 @@ cli = FlaskGroup(server)
 def create_db():
     db.drop_all()
     db.create_all()
+    user_to_db("admin", "admin", "admin@example.com", "admin")
     db.session.commit()
 
 
