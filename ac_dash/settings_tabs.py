@@ -371,7 +371,6 @@ def mk_init_tabs():
                                                     dcc.Dropdown(
                                                         id="flux-init-meteo-source",
                                                         options=distinct_source,
-                                                        value=distinct_source[0],
                                                         style={"width": "20vw"},
                                                     ),
                                                 ]
