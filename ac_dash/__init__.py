@@ -8,7 +8,6 @@ from .utils import (
     load_config,
 )
 from .callbacks import register_callbacks
-from .temp_users import users
 import logging
 from .common_utils.utils import protect_dash_app
 

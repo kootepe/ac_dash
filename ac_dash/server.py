@@ -26,7 +26,6 @@ from .data_mgt import (
     init_instruments,
 )
 
-from .temp_users import users as init_users
 
 logger = logging.getLogger("defaultLogger")
 
