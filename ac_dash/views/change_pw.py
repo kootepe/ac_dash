@@ -24,26 +24,42 @@ def mk_change_pw(flask_app=None, url="/changepw/", username=None):
             ),
             html.Div(
                 [
-                    html.Label("Current password"),
-                    dcc.Input(
-                        id="current-password",
-                        type="password",
-                        placeholder="Current Password",
-                        style={"margin": "10px", "width": "100%"},
-                    ),
-                    html.Label("New password"),
-                    dcc.Input(
-                        id="new-password",
-                        type="password",
-                        placeholder="New Password",
-                        style={"margin": "10px", "width": "100%"},
-                    ),
-                    html.Label("Confirm password"),
-                    dcc.Input(
-                        id="confirm-password",
-                        type="password",
-                        placeholder="Confirm New Password",
-                        style={"margin": "10px", "width": "100%"},
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.Label("Current password"),
+                                    dcc.Input(
+                                        id="current-password",
+                                        type="password",
+                                        placeholder="Current Password",
+                                        style={"margin": "10px"},
+                                    ),
+                                ]
+                            ),
+                            html.Div(
+                                [
+                                    html.Label("New password"),
+                                    dcc.Input(
+                                        id="new-password",
+                                        type="password",
+                                        placeholder="New Password",
+                                        style={"margin": "10px"},
+                                    ),
+                                ]
+                            ),
+                            html.Div(
+                                [
+                                    html.Label("Confirm password"),
+                                    dcc.Input(
+                                        id="confirm-password",
+                                        type="password",
+                                        placeholder="Confirm New Password",
+                                        style={"margin": "10px"},
+                                    ),
+                                ]
+                            ),
+                        ]
                     ),
                     html.Button(
                         "Change Password",
