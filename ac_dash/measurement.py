@@ -72,6 +72,8 @@ class MeasurementCycle:
         self.lag_end = self.open + pd.Timedelta(seconds=160)
         self.all_r_ch4 = [0]
         self.updated_height = False
+        self.quality_r = 1
+        self.quality_r2 = 1
         # init from db if data found
         if self.check_db():
             self.lag_end = self.open + pd.Timedelta(seconds=160)
@@ -107,8 +109,6 @@ class MeasurementCycle:
         self.calc_offset_s = {gas: 0 for gas in self.flux_gases}
         self.calc_offset_e = {gas: 0 for gas in self.flux_gases}
 
-        self.quality_r = 1
-        self.quality_r2 = 1
         self.get_max(conn=conn)
 
     def manual_lag(self, lag):
