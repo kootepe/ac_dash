@@ -22,7 +22,32 @@ def mk_attribute_plot(
     current_measurement = measurement
 
     if gas is None:
-        attribute_value = getattr(current_measurement, attribute)
+        try:
+            attribute_value = getattr(current_measurement, attribute)
+        except AttributeError:
+            return go.Figure(
+                layout=go.Layout(
+                    title={
+                        "text": attribute,
+                        "font": {"family": "monospace", "size": 14},
+                    },
+                    annotations=[
+                        dict(
+                            name="draft watermark",
+                            text=f"{attribute} doesnt exist for instrument",
+                            textangle=0,
+                            opacity=0.4,
+                            font=dict(color="black", size=40),
+                            xref="paper",
+                            yref="paper",
+                            x=0.5,
+                            y=0.5,
+                            showarrow=False,
+                        )
+                    ],
+                )
+            )
+
         attribute_name = attribute
     else:
         attribute_value = getattr(current_measurement, attribute).get(gas)
@@ -70,7 +95,10 @@ def mk_attribute_plot(
     layout = go.Layout(
         hovermode="closest",
         hoverdistance=30,
-        title={"text": attribute_name},
+        title={
+            "text": attribute_name,
+            "font": {"family": "monospace", "size": 14},
+        },
         margin=dict(l=10, r=10, t=30, b=10),
         xaxis=dict(
             type="date",
@@ -85,7 +113,7 @@ def mk_attribute_plot(
         ),
         legend=dict(
             font=dict(size=13),
-            orientation="v",
+            orientation="h",
             tracegroupgap=3,
             # itemclick=False,
             # itemdoubleclick=False,
