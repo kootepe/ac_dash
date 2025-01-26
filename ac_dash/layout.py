@@ -46,7 +46,7 @@ def mk_main_page(left_settings, right_settings, instruments, settings):
             if details.get("serial") == serial:
                 found[instrument_name] = details
     avail_instruments = [
-        {"label": f"{key}", "value": json.dumps({key: item})}
+        {"label": f"{key}", "value": json.dumps({"data": item})}
         for key, item in found.items()
     ]
 
