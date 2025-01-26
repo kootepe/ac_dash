@@ -140,17 +140,21 @@ def mk_main_page(left_settings, right_settings, instruments, settings):
                         [
                             html.Button("Previous", id="prev-button", n_clicks=0),
                             html.Button("Next", id="next-button", n_clicks=0),
-                        ]
+                        ],
+                        id="nav-buttons",
                     ),
-                    *[
-                        html.Button(
-                            item["text"],
-                            id={"type": "logic-button", "index": key},
-                            n_clicks=0,
-                            style={"padding": "1px"},
-                        )
-                        for key, item in settings["layout_buttons"].items()
-                    ],
+                    html.Div(
+                        [
+                            html.Button(
+                                item["text"],
+                                id={"type": "logic-button", "index": key},
+                                n_clicks=0,
+                                style={"padding": "1px"},
+                            )
+                            for key, item in settings["layout_buttons"].items()
+                        ],
+                        id="logic-buttons",
+                    ),
                 ],
                 # [
                 #     html.Button("Delete lagtime", id="del-lagtime", n_clicks=0),
