@@ -1,0 +1,92 @@
+{
+  "layout": {
+    "settings": {
+      "invalid_if_no_temp_pressure": {
+        "text": "Invalidate measurement if using default air temperature or pressure",
+        "type": "dropdown",
+        "multi": 0,
+        "opts": [
+          "True",
+          "False"
+        ],
+        "value": "True"
+      },
+      "zoom_to_calc": {
+        "text": "Zoom to calculation area.",
+        "type": "dropdown",
+        "multi": 0,
+        "opts": [
+          0,
+          1
+        ],
+        "value": 0
+      },
+      "gas_graphs": {
+        "text": "Which gases to plot",
+        "type": "dropdown",
+        "multi": 1,
+        "opts": [
+          "CH4",
+          "CO2",
+          "N2O"
+        ],
+        "value": [
+          "CH4",
+          "CO2",
+          "N2O"
+        ]
+      },
+      "attribute_graphs": {
+        "text": "Which measurement attributes to plot",
+        "type": "dropdown",
+        "multi": 1,
+        "opts": [
+          "lagtime",
+          "r_std",
+          "quality_r2",
+          "CO2_flux",
+          "CH4_flux",
+          "N2O_flux",
+          "CO2_r2",
+          "CH4_r2",
+          "N2O_r2",
+          "CO2_r",
+          "CH4_r",
+          "N2O_r"
+        ],
+        "value": [
+          "lagtime",
+          "CO2_flux",
+          "quality_r2",
+          "CH4_flux",
+          "CO2_r2"
+        ]
+      },
+      "keybinds": {
+        "i": "toggle-valid",
+        "l": "next-button",
+        "h": "prev-button"
+      },
+      "layout_buttons": {
+        "max-r": {
+          "text": "Guess lagtime"
+        },
+        "push-single": {
+          "text": "Push current measurement"
+        },
+        "toggle-valid": {
+          "text": "Toggle valid"
+        },
+        "reset-index": {
+          "text": "Jump to beginning"
+        },
+        "add-time": {
+          "text": "Add 2min"
+        },
+        "substract-time": {
+          "text": "Substract 2min"
+        }
+      }
+    }
+  }
+}
