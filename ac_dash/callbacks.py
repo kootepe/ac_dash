@@ -143,13 +143,13 @@ def register_callbacks(
         # *[Input(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
     )
 
-    @app.callback(
-        # Output("used-instrument-select", "options"),
-        Input("instrument-init", "id"),
-    )
-    def init_data(test):
-        get_distinct_instrument()
-        pass
+    # @app.callback(
+    #     # Output("used-instrument-select", "options"),
+    #     Input("instrument-init", "id"),
+    # )
+    # def init_data(test):
+    #     get_distinct_instrument()
+    #     pass
 
     @app.callback(
         Output("model-input-div", "style"),
