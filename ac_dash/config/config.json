@@ -2,7 +2,7 @@
   "layout": {
     "settings": {
       "invalid_if_no_temp_pressure": {
-        "text": "Invalidate measurement if using default air temperature or pressure <- doesnt work",
+        "text": "Invalidate measurement if using default air temperature or pressure / doesnt work",
         "type": "dropdown",
         "multi": 0,
         "opts": [

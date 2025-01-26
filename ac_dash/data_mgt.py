@@ -572,7 +572,7 @@ class Volume(db.Model):
     ne = db.Column(db.Float)
     mid = db.Column(db.Float)
     has_snow = db.Column(db.Integer)
-    chamber_height = db.Column(db.Float, nullable=True)
+    chamber_height = db.Column(db.Float)
     unit = db.Column(db.String)
 
     # must be a tuple even with just one item
@@ -595,25 +595,24 @@ def get_single_volume(timestamp):
     #     Meteo_tbl.c.datetime <= (start + pd.Timedelta(days=1)),
     # )
     start = timestamp - pd.Timedelta(days=365)
-    end = timestamp + pd.Timedelta(minutes=365)
+    end = timestamp + pd.Timedelta(days=365)
     # query = f"""SELECT *
     #         FROM meteo_table
     #         ORDER BY ABS(EXTRACT(EPOCH FROM (your_datetime_column - TIMESTAMP '{start}')))
     #         LIMIT 1;"""
     query = f"""
             SELECT *
-            FROM meteo_table
-            WHERE datetime BETWEEN TIMESTAMP '{start}' 
-                                        AND TIMESTAMP '{end}'
-            ORDER BY ABS(EXTRACT(EPOCH FROM (datetime - TIMESTAMP '{start}')))
+            FROM volume_table
+            WHERE datetime BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}'
+            ORDER BY ABS(EXTRACT(EPOCH FROM (datetime - TIMESTAMP '{timestamp}')))
             LIMIT 1;
             """
     df = pd.read_sql_query(query, engine)
     if df is None or df.empty:
-        return None, None
+        return None
     data = df.iloc[0]
 
-    height = data.get("height")
+    height = data.get("chamber_height")
 
     return height
 
@@ -861,20 +860,22 @@ def drop_pk_dupes(df, table, primary_keys, con):
         query = f"SELECT {key_columns} FROM {table}"
     else:
         query = f"SELECT {key_columns} FROM {table} WHERE {dt_col} >= '{start}' AND {dt_col} <= '{end}'"
-    existing_df = pd.read_sql(query, con)
+    edf = pd.read_sql(query, con)
 
     # If no existing rows are found, return the input dataframe and an empty duplicates dataframe
-    if existing_df.empty:
+    if edf.empty:
         return df.copy(), pd.DataFrame(columns=df.columns)
 
     # Create composite keys for detecting duplicates
     df["composite_key"] = list(zip(*[df[key] for key in primary_keys]))
-    existing_df["composite_key"] = list(
-        zip(*[existing_df[key] for key in primary_keys])
-    )
+    edf["composite_key"] = list(zip(*[edf[key] for key in primary_keys]))
+    print(df["composite_key"])
+    print(edf["composite_key"])
+    print(edf.dtypes)
+    print(df.dtypes)
 
     # Identify duplicates
-    existing_keys = set(existing_df["composite_key"])
+    existing_keys = set(edf["composite_key"])
     duplicates = df[df["composite_key"].isin(existing_keys)].copy()
 
     # Filter out duplicates from the original dataframe

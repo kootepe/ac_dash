@@ -298,13 +298,13 @@ def register_callbacks(
     @app.callback(
         Output("volume-input-warn", "children"),
         Output("volume-input-show", "children"),
-        State("volume-source-input", "value"),
         Input("upload-volume", "contents"),
         State("upload-volume", "filename"),
         prevent_initial_call=True,
     )
-    def volume_init_callback(source, contents, filename):
-        warn, show = read_volume_init_input(source, contents, filename)
+    def volume_init_callback(contents, filename):
+        logger.debug("test")
+        warn, show = read_volume_init_input(contents, filename)
         return warn, show
 
     @app.callback(

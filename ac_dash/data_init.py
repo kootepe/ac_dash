@@ -11,6 +11,7 @@ from .data_mgt import (
     df_to_gas_table,
     df_to_cycle_table,
     df_to_meteo_table,
+    df_to_volume_table,
     cycle_table_to_df,
     flux_table_to_df,
     check_existing_instrument,
@@ -37,7 +38,11 @@ def read_gas_init_input(use_class, serial, model, name, contents, filename):
     content_type, content_str = contents.split(",")
     ext = filename.split(".")[-1].lower()
     decoded = base64.b64decode(content_str)
-    instrument = instruments.get(use_class)(serial)
+    instrument = instruments.get(use_class)
+    if instrument is None:
+        return f"Incorrect instrument: {serial} {model}"
+
+    instrument = instrument(serial)
     file_exts = ["csv", "data", "dat"]
     try:
         if ext in file_exts:
@@ -189,12 +194,47 @@ def init_flux(init, start, end, instrument, meteo):
         df.sort_values("start_time", inplace=True)
         logger.debug(df)
         instrument = json.loads(instrument)
-        first_key = next(iter(instrument))
-        serial = instrument[first_key]["serial"]
-        use_class = instrument[first_key]["class"]
+        serial = instrument["serial"]
+        use_class = instrument["python_class"]
         instrument = instruments.get(use_class)(serial)
         init_from_cycle_table(df, serial=serial, use_class=use_class, conn=conn)
 
 
 def read_volume_init_input(contents, filename):
-    pass
+    """Read data passed from the settings page"""
+    # global instruments
+    content_type, content_str = contents.split(",")
+    ext = filename.split(".")[-1].lower()
+    decoded = base64.b64decode(content_str)
+    file_exts = ["csv", "data", "dat"]
+
+    def read_volume_file(file):
+        df = pd.read_csv(file)
+        df["datetime"] = pd.to_datetime(df["datetime"], format="ISO8601")
+        df["datetime"] = (
+            df["datetime"]
+            .dt.tz_localize(
+                "Europe/Helsinki", ambiguous=True, nonexistent="shift_forward"
+            )
+            .dt.tz_convert("UTC")
+        )
+        df["chamber_id"] = df["chamber_id"].astype(str)
+        df["chamber_height"] = df["chamber_height"].astype(float)
+        return df
+
+    try:
+        file_exts = ["csv"]
+        if ext in file_exts:
+            logger.debug("Read file.")
+            df = read_volume_file(io.StringIO(decoded.decode("utf-8")))
+            in_rows = len(df)
+            logger.debug("Pushing to table")
+            pushed_data = df_to_volume_table(df)
+            push_rows = len(pushed_data)
+            return "", f"Pushed {push_rows}/{in_rows}"
+
+        else:
+            return "Wrong filetype extension", ""
+    except Exception as e:
+        logger.debug(traceback.format_exc())
+        return f"Exception {e}", ""
