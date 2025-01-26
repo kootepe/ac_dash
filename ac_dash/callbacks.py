@@ -320,7 +320,7 @@ def register_callbacks(
         Output("settings-store", "data"),
         Output("show-settings", "children"),
         Input("save-settings", "n_clicks"),
-        Input("settings-store", "data"),
+        State("settings-store", "data"),
         State("show-settings", "children"),
         prevent_initial_call=True,
     )
@@ -364,8 +364,8 @@ def register_callbacks(
     def display_page(pathname, settings_store, flux_col_store):
         logger.debug(settings_store)
         if pathname == f"{url}settings":
-            page, _ = mk_settings(settings_store)
-            page = mk_settings_page(page, settings_store)
+            settings_dropdowns, _ = mk_settings(settings_store)
+            page = mk_settings_page(settings_dropdowns, settings_store)
             return page
         if pathname == f"{url}db_view":
             logger.info("Making db view")

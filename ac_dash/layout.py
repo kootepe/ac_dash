@@ -179,7 +179,7 @@ def mk_main_page(left_settings, right_settings, instruments, settings):
 
 
 def mk_settings(settings_json):
-    all_settings = []
+    settings_dropdowns = []
     stored_settings = {}
     for key, setting in settings_json.items():
         # if setting.get("type", None) is None and isinstance(setting, dict):
@@ -192,9 +192,9 @@ def mk_settings(settings_json):
         if setting.get("type", None) is not None:
             if setting["type"] == "dropdown":
                 dd = create_dropdown(setting, key)
-                all_settings.append(dd)
+                settings_dropdowns.append(dd)
                 stored_settings[key] = setting
-    return all_settings, stored_settings
+    return settings_dropdowns, stored_settings
 
 
 def create_dropdown(settings, name):
@@ -327,8 +327,8 @@ def create_layout(layout_json, url):
     right_graphs = settings_json["attribute_graphs"]
     instruments = layout_json["instruments"]
 
-    settings_elems, stored_settings = mk_settings(settings_json)
-    settings_page = mk_settings_page(settings_elems, settings_json)
+    settings_dropdowns, stored_settings = mk_settings(settings_json)
+    settings_page = mk_settings_page(settings_dropdowns, settings_json)
 
     main_page, graph_names, graphs = mk_main_page(
         left_graphs,
