@@ -40,7 +40,7 @@ class MeasurementCycle:
         conn=None,
         meteo_source=None,
     ):
-        self.id = id
+        self.chamber_id = id
         self.instrument = instrument
         self.flux_gases = self.instrument.flux_gases
         self.gases = self.instrument.gases
@@ -88,7 +88,7 @@ class MeasurementCycle:
         self.air_temperature, self.air_pressure = get_single_meteo(
             self.start_time, meteo_source
         )
-        self.chamber_height = get_single_volume(self.start_time)
+        self.chamber_height = get_single_volume(self.start_time, self.chamber_id)
         logger.debug("No flux in db")
 
         # used to look for the drop indicating the opening of the chamber for
@@ -314,7 +314,7 @@ class MeasurementCycle:
         }
         attributes = {
             "start_time": self.start_time,
-            "chamber_id": self.id,
+            "chamber_id": self.chamber_id,
             "instrument_model": self.instrument.model,
             "instrument_serial": self.instrument.serial,
             "updated_height": self.updated_height,
@@ -386,7 +386,7 @@ class MeasurementCycle:
         self._end_offset = vals.get("end_offset")
         self.updated_height = vals.get("updated_height")
 
-        self.id = vals.get("chamber_id")
+        self.chamber_id = vals.get("chamber_id")
         self.end_offset = vals.get("end_offset")
         self.air_pressure = vals.get("air_pressure")
         self.air_temperature = vals.get("air_temperature")
@@ -839,7 +839,7 @@ class MeasurementCycle:
 
         layout = go.Layout(
             title={
-                "text": f"Chamber {self.id} {gas} Measurement {self.start_time}",
+                "text": f"Chamber {self.chamber_id} {gas} Measurement {self.start_time}",
                 "font": {"family": "monospace", "size": 14},
             },
             margin=dict(

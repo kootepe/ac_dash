@@ -588,22 +588,14 @@ def mk_volume_table():
     Volume.metadata.create_all(engine)
 
 
-def get_single_volume(timestamp):
+def get_single_volume(timestamp, chamber_id):
     logger.debug("Running get single temp")
-    # select_st = select(Meteo_tbl).where(
-    #     Meteo_tbl.c.datetime >= (start - pd.Timedelta(days=1)),
-    #     Meteo_tbl.c.datetime <= (start + pd.Timedelta(days=1)),
-    # )
     start = timestamp - pd.Timedelta(days=365)
     end = timestamp + pd.Timedelta(days=365)
-    # query = f"""SELECT *
-    #         FROM meteo_table
-    #         ORDER BY ABS(EXTRACT(EPOCH FROM (your_datetime_column - TIMESTAMP '{start}')))
-    #         LIMIT 1;"""
     query = f"""
             SELECT *
             FROM volume_table
-            WHERE datetime BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}'
+            WHERE datetime BETWEEN TIMESTAMP '{start}' AND TIMESTAMP '{end}' and chamber_id = '{chamber_id}'
             ORDER BY ABS(EXTRACT(EPOCH FROM (datetime - TIMESTAMP '{timestamp}')))
             LIMIT 1;
             """
