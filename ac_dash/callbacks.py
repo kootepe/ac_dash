@@ -427,7 +427,6 @@ def register_callbacks(
             page, _, _ = mk_main_page(
                 settings_store["gas_graphs"],
                 settings_store["attribute_graphs"],
-                settings_store["instruments"],
                 settings_store,
             )
             return page

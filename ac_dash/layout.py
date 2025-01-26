@@ -38,7 +38,7 @@ upload_style = style = {
 }
 
 
-def mk_main_page(left_settings, right_settings, instruments, settings):
+def mk_main_page(left_settings, right_settings, settings):
     db_instruments = get_instrument_rows_as_dicts()
 
     # if serial is empty, there's no data for it
@@ -325,7 +325,6 @@ def create_layout(layout_json, url):
     logger.debug("Creating layout.")
     left_graphs = settings_json["gas_graphs"]
     right_graphs = settings_json["attribute_graphs"]
-    instruments = layout_json["instruments"]
 
     settings_dropdowns, stored_settings = mk_settings(settings_json)
     settings_page = mk_settings_page(settings_dropdowns, settings_json)
@@ -333,11 +332,9 @@ def create_layout(layout_json, url):
     main_page, graph_names, graphs = mk_main_page(
         left_graphs,
         right_graphs,
-        instruments,
         settings_json,
     )
     stored_settings["graph_names"] = graph_names
-    stored_settings["instruments"] = instruments
     logout = html.A("Log out", href="/logout")
 
     layout = html.Div(
