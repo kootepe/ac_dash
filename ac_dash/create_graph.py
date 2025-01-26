@@ -1,3 +1,4 @@
+import hashlib
 from .tools.influxdb_funcs import init_client, just_read, read_ifdb
 from plotly.graph_objs import Scattergl
 import plotly.graph_objs as go
@@ -137,18 +138,26 @@ def mk_attribute_plot(
 
 
 fixed_color_mapping = {}
-# drop the orange from the second list
-color_list = px.colors.qualitative.Plotly + px.colors.qualitative.D3[2:]
+# Drop the orange from the second list
+color_list = px.colors.qualitative.D3[2:] + px.colors.qualitative.Plotly
 
 
 def create_color_mapping(df, column_name):
     """Create a deterministic color map where the same value always gets the same color."""
     unique_values = sorted(df[column_name].unique())
     num_colors = len(color_list)
-    logger.debug(color_list)
 
-    # Create a mapping using a hash of the value to select a color
-    color_mapping = {val: color_list[hash(val) % num_colors] for val in unique_values}
+    # Use a deterministic hashing function to map values to a consistent index
+    def deterministic_hash(val):
+        hash_obj = hashlib.md5(
+            str(val).encode("utf-8")
+        )  # Use MD5 hashing for consistency
+        return int(hash_obj.hexdigest(), 16)  # Convert the hash to an integer
+
+    # Create the color mapping
+    color_mapping = {
+        val: color_list[deterministic_hash(val) % num_colors] for val in unique_values
+    }
 
     return color_mapping
 
