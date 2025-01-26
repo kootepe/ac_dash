@@ -769,7 +769,9 @@ def register_callbacks(
         html = formatted.replace(" ", "\u00a0")
         all_meas = f"{all_meas+1:5}"
         all_meas = all_meas.replace(" ", "\u00a0")
-        info_text = f"#{html}/{all_meas}     {str(measurement)}".replace(" ", "\u00a0")
+        info_text = f"#{html}/{all_meas} {measurement.start_time}"
+        info_text2 = mk_info_tbl(measurement)
+        info_text = [info_text, info_text2]
         return (
             figs,
             attr_plots,
@@ -777,3 +779,52 @@ def register_callbacks(
             index,
             selected_chambers,
         )
+
+
+def mk_info_tbl(measurement):
+    style = {
+        "border": "1px solid #bbb",
+        "font-size": "14px",
+    }
+    style_right = {
+        "border": "1px solid #bbb",
+        "font-size": "14px",
+        "text-align": "right",
+    }
+    return html.Table(
+        [
+            # html.Tr(
+            #     [
+            #         html.Td("start_time", style=style),
+            #         html.Td(measurement.start_time, style=style),
+            #     ]
+            # ),
+            html.Tr(
+                [
+                    html.Td("Lag", style=style),
+                    html.Td(f"{measurement.lagtime}s", style=style_right),
+                ]
+            ),
+            html.Tr(
+                [
+                    html.Td("Chamber height", style=style),
+                    html.Td(f"{measurement.chamber_height}m", style=style_right),
+                ]
+            ),
+            html.Tr(
+                [
+                    html.Td("Temperature", style=style),
+                    html.Td(
+                        f"{round(measurement.air_temperature, 2)}c", style=style_right
+                    ),
+                ]
+            ),
+            html.Tr(
+                [
+                    html.Td("Errors", style=style),
+                    html.Td(f"{measurement.error_string}", style=style_right),
+                ]
+            ),
+        ],
+        style={"border-collapse": "collapse"},
+    )
