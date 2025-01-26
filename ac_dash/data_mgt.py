@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import select, desc
 from flask_sqlalchemy import SQLAlchemy
 from .db import engine
+from .measuring import instruments
 
 db = SQLAlchemy()
 logger = logging.getLogger("defaultLogger")
@@ -534,8 +535,6 @@ def df_to_meteo_table(df):
     logger.debug(df)
     table = Meteo.__tablename__
     primary_keys = get_primary_keys(table, engine)
-    print(table)
-    print(primary_keys)
     with engine.begin() as con:
         df_new, _ = drop_pk_dupes(df, table, primary_keys, con)
         logger.debug(df_new)
@@ -740,8 +739,9 @@ def del_volume_measurement(time, id):
 class Instruments(db.Model):
     __tablename__ = "instrument_table"
     serial = db.Column(db.String, primary_key=True)
-    model = db.Column(db.String)
-    use_class = db.Column(db.String)
+    model = db.Column(db.String, primary_key=True)
+    python_class = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String)
 
 
 Instrument_tbl = Table("instrument_table", Instruments.metadata)
@@ -751,11 +751,70 @@ def mk_instrument_table():
     Instruments.metadata.create_all(engine)
 
 
+def add_instrument(model, serial, python_class, name=None):
+    ins = Instrument_tbl.insert().values(
+        serial=serial, model=model, python_class=python_class, name=name
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+
+
+def get_instrument_rows_as_dicts():
+    """
+    Fetch all rows from a table and return them as a list of dictionaries.
+
+    Parameters:
+        table (Base): SQLAlchemy table model class.
+
+    Returns:
+        List[dict]: List of rows as dictionaries.
+    """
+    select_st = text("SELECT * from instrument_table;")
+    with engine.connect() as conn:
+        df = pd.read_sql(select_st, conn)
+
+    rows = df.to_dict(orient="records")
+    non_empty = [d for d in rows if d.get("serial") != ""]
+    empty = [d for d in rows if d.get("serial") == ""]
+    ordered = non_empty + empty
+
+    return ordered
+
+
 def instruments_to_df():
     select_st = select(text("SELECT * FROM instrument_table;"))
     with engine.connect() as conn:
         df = pd.read_sql(select_st, conn)
     return df
+
+
+def init_instruments():
+    """Initiate built in instruments"""
+    for class_key, InstrumentClass in instruments.items():
+        instrument = InstrumentClass("")
+        serial = instrument.serial
+        model = instrument.model
+        python_class = instrument.__class__.__name__
+        if check_existing_instrument(serial, model, python_class):
+            logger.info("Instrument exists")
+            continue
+        ins = Instrument_tbl.insert().values(
+            serial=serial, model=model, python_class=python_class
+        )
+        with engine.begin() as conn:
+            conn.execute(ins)
+
+
+def check_existing_instrument(serial, model, python_class):
+    existing_serial_q = f"""
+        SELECT 1 FROM instrument_table WHERE serial = '{serial}' and model = '{model}' and python_class = '{python_class}';
+        """
+    with engine.connect() as conn:
+        existing_serial = conn.execute(text(existing_serial_q)).fetchone()
+
+    if existing_serial:
+        print(f"Serial {serial} already exists.")
+        return True
 
 
 def get_primary_keys(table_name, engine):

@@ -4,8 +4,8 @@ from datetime import timedelta
 import logging
 import json
 
-from .settings_tabs import data_init_tabs
-from .data_mgt import Flux_tbl, get_distinct_instrument
+from .settings_tabs import mk_init_tabs
+from .data_mgt import Flux_tbl, get_instrument_rows_as_dicts
 
 columns = [column.name for column in Flux_tbl.columns]
 
@@ -39,15 +39,13 @@ upload_style = style = {
 
 
 def mk_main_page(left_settings, right_settings, instruments, settings):
-    serials = get_distinct_instrument()
-    found = {}
-    for serial in serials:
-        for instrument_name, details in instruments.items():
-            if details.get("serial") == serial:
-                found[instrument_name] = details
-    avail_instruments = [
-        {"label": f"{key}", "value": json.dumps({"data": item})}
-        for key, item in found.items()
+    db_instruments = get_instrument_rows_as_dicts()
+
+    # if serial is empty, there's no data for it
+    db_instruments = [row for row in db_instruments if row["serial"] != ""]
+
+    dd_items = [
+        {"label": item["name"], "value": json.dumps(item)} for item in db_instruments
     ]
 
     left_graphs = [
@@ -119,15 +117,10 @@ def mk_main_page(left_settings, right_settings, instruments, settings):
             html.Div(
                 [
                     dcc.Dropdown(
-                        options=avail_instruments,
-                        value=avail_instruments[0]["value"],
-                        # options=[
-                        #     {
-                        #         "label": f"Generic {key}",
-                        #         "value": key,
-                        #     }
-                        #     for key in instruments.keys()
-                        # ],
+                        options=dd_items,
+                        persistence=True,
+                        persisted_props=["value"],
+                        persistence_type="local",
                         multi=False,
                         id="used-instrument-select",
                         style={"width": "20vw"},
@@ -156,20 +149,6 @@ def mk_main_page(left_settings, right_settings, instruments, settings):
                         id="logic-buttons",
                     ),
                 ],
-                # [
-                #     html.Button("Delete lagtime", id="del-lagtime", n_clicks=0),
-                #     html.Button("Guess lagtime", id="max-r", n_clicks=0),
-                #     html.Button("Push all", id="push-all", n_clicks=0),
-                #     html.Button("Push current point", id="push-single", n_clicks=0),
-                #     html.Button("Mark invalid", id="mark-invalid", n_clicks=0),
-                #     html.Button("Mark valid", id="mark-valid", n_clicks=0),
-                #     html.Button("Reset open and close", id="reset-cycle", n_clicks=0),
-                #     html.Button("Jump to beginning", id="reset-index", n_clicks=0),
-                #     html.Button("Reset the app", id="run-init", n_clicks=0),
-                #     html.Button("Recalculate", id="run-recalc", n_clicks=0),
-                #     html.Button("Add 2min", id="add-time", n_clicks=0),
-                #     html.Button("Substract 2min", id="substract-time", n_clicks=0),
-                # ],
                 style={"margin": "5px"},
             ),
             html.Div(
@@ -297,7 +276,6 @@ def mk_settings_page(settings_elems, settings_json):
     ]
     children = header + children
 
-    # rows = html.Tr([html.Td(), html.Td(dcc.Input(placeholder="Give keycode"))])
     keybinds = html.Div(
         [
             # Input to bind keys to specific actions
@@ -334,15 +312,8 @@ def mk_settings_page(settings_elems, settings_json):
                         label="Keybinds -- not implemented yet",
                         children=[keybinds],
                     ),
-                    dcc.Tab(label="Data initiation", children=data_init_tabs),
+                    dcc.Tab(label="Data initiation", children=mk_init_tabs()),
                 ],
-                style={
-                    # "height": "5vw",
-                    # "display": "flex",
-                    # "align-items": "center",
-                    # "justifyContent": "center",
-                    # "font-size": "1em",
-                },
             ),
         ]
     )
@@ -374,7 +345,6 @@ def create_layout(layout_json, url):
             dcc.Location(id="url", refresh=False),
             dcc.Store(id="settings-store", data=stored_settings, storage_type="local"),
             dcc.Store("flux-table-col-store", data=columns, storage_type="local"),
-            # dcc.Store("selected-instrument-store", data=avail_instruments[0]["value"], storage_type="local"),
             html.Div(id="instrument-init", style={"display": "none"}),
             html.A("Go to Home Page", href="/", style={"padding-right": "15px"}),
             dcc.Download(id="dl-template"),

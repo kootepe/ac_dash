@@ -1,10 +1,6 @@
 import logging
-import traceback
-import io
 import json
 import pandas as pd
-import requests
-import base64
 from dash import (
     dcc,
     Output,
@@ -12,50 +8,31 @@ from dash import (
     Input,
     State,
     ctx,
-    callback_context,
     no_update,
     html,
     ALL,
 )
 
-from flask import request as flask_request, request
-from .db import engine
 
 from .utils import (
     handle_triggers,
     no_data_response,
-    load_measurement_data,
     execute_actions,
     create_gas_plots,
     create_attribute_graph,
-    generate_measurement_info,
     parse_date_range,
-    process_measurement_zip,
-    process_measurement_file,
-    process_protocol_file,
-    process_protocol_zip,
-    init_from_cycle_table,
 )
-from .api.routes import CycleApi
-from .measuring import instruments
 from .data_mgt import (
-    flux_range_to_df,
     cycle_table_to_df,
     flux_table_to_df,
     volume_table_to_df,
     meteo_table_to_df,
-    gas_table_to_df,
-    df_to_gas_table,
-    df_to_cycle_table,
-    df_to_meteo_table,
-    get_distinct_instrument,
 )
 from .create_graph import apply_graph_zoom
 from .layout import (
     mk_settings,
     mk_settings_page,
     mk_main_page,
-    create_layout,
     graph_style,
 )
 from .db_view_page import mk_db_view_page
@@ -114,12 +91,6 @@ def register_callbacks(
     keybinds = settings["settings"]["keybinds"]
     app.clientside_callback(
         mk_binds(settings["settings"]["keybinds"]),
-        # *[Output(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
-        # *[
-        #     Output(elem, "id")
-        #     for key, elem in keybinds.items()
-        #     if elem in ["prev-button", "next-button"]
-        # ],
         *[
             Output(elem, "id")
             for key, elem in keybinds.items()
@@ -143,21 +114,15 @@ def register_callbacks(
         # *[Input(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
     )
 
-    # @app.callback(
-    #     # Output("used-instrument-select", "options"),
-    #     Input("instrument-init", "id"),
-    # )
-    # def init_data(test):
-    #     get_distinct_instrument()
-    #     pass
-
     @app.callback(
         Output("model-input-div", "style"),
-        Output("model-input", "disabled"),
         Output("model-input", "value"),
         Output("serial-input-div", "style"),
         Output("serial-input", "disabled"),
         Output("serial-input", "value"),
+        Output("name-input-div", "style"),
+        Output("name-input", "disabled"),
+        Output("name-input", "value"),
         Output("class-input-div", "style"),
         Output("class-input", "disabled"),
         Output("class-input", "value"),
@@ -166,123 +131,82 @@ def register_callbacks(
         State("settings-store", "data"),
         prevent_initial_call=True,
     )
-    def show_serial_input(value, serial_style, stored):
+    def show_instruments_for_gas_init(value, serial_style, stored):
         """
         Show instrument details based on the selected instrument.
 
         Parameters
         ----------
-        value : dictionary
-            The options in the dropdown map to a dictionary defined in the
-            initial layout.
+        value : str
+            JSON string representing the selected instrument's details.
 
-        serial_style : dictionary
+        serial_style : dict
+            The current style of the serial input div.
 
-        stored : dictionary
-
-
+        stored : dict
+            Data stored in the settings-store.
 
         Returns
         -------
-
-
-
-
-
-
-
-
-
+        tuple
+            Updated styles, disabled states, and values for the model, serial,
+            name, and class input components.
         """
-        # NOTE: This is a mess that needs to be sorted.
-        if value is None:
-            return (
-                serial_style,
-                False,
-                "",
-                serial_style,
-                False,
-                "",
-                serial_style,
-                False,
-                "",
-            )
-        # NOTE: value is a dictionary:
-        # {arbitrary instrument name: {
-        # model: instrument_model,
-        # class : class representation of instrument in measuring.py}}
-        value = json.loads(value)
 
-        if value is None:
-            serial_style["display"] = "none"
+        def create_return(
+            serial_style,
+            model_value,
+            serial_disabled,
+            serial_value,
+            name_style,
+            name_disabled,
+            name_value,
+            class_value,
+        ):
+            """Helper function to structure the return values."""
             return (
                 serial_style,
-                False,
-                "",
+                model_value,
                 serial_style,
-                False,
-                "",
-                serial_style,
-                False,
-                "",
-            )
-        selected = next(
-            (v for v in value.keys()),
-            None,
-        )
-        model = next(
-            (
-                v["model"]
-                for v in value.values()
-                if isinstance(v, dict) and "model" in v
-            ),
-            None,
-        )
-        use_class = next(
-            (
-                v["class"]
-                for v in value.values()
-                if isinstance(v, dict) and "class" in v
-            ),
-            None,
-        )
-        # names appended with Generic are the available instruments defined in measuring.py
-        if "Generic" in selected:
-            serial_style["display"] = "block"
-            return (
-                serial_style,
-                True,
-                model,
-                serial_style,
-                False,
-                "",
+                serial_disabled,
+                serial_value,
+                name_style,
+                name_disabled,
+                name_value,
                 no_update,
                 False,
-                use_class,
+                class_value,
+            )
+
+        # Default behavior when no value is selected
+        if value is None:
+            return create_return(
+                serial_style, "", False, "", serial_style, False, "", ""
+            )
+
+        value = json.loads(value)  # Parse the selected instrument details
+        if value is None:  # Edge case if value is invalid JSON
+            serial_style["display"] = "none"
+            return create_return(
+                serial_style, "", False, "", serial_style, False, "", ""
+            )
+
+        # Extract the instrument details
+        needs_init = value.get("init", False)
+        model = value.get("model", "")
+        use_class = value.get("python_class", "")
+        name = value.get("name", "")
+        serial = value.get("serial", "")
+
+        serial_style["display"] = "block"
+
+        if needs_init:
+            return create_return(
+                serial_style, model, False, "", serial_style, False, "", use_class
             )
         else:
-            serial_style["display"] = "block"
-            for key, item in value.items():
-                serial = next(
-                    (
-                        v["serial"]
-                        for v in value.values()
-                        if isinstance(v, dict) and "serial" in v
-                    ),
-                    None,
-                )
-                # serial = item["serial"]
-                # model = item["model"]
-            return (
-                serial_style,
-                True,
-                model,
-                serial_style,
-                True,
-                serial,
-                no_update,
-                False,
-                use_class,
+            return create_return(
+                serial_style, model, True, serial, serial_style, True, name, use_class
             )
 
     @app.callback(
@@ -291,12 +215,15 @@ def register_callbacks(
         State("class-input", "value"),
         State("serial-input", "value"),
         State("model-input", "value"),
+        State("name-input", "value"),
         Input("upload-data", "contents"),
         State("upload-data", "filename"),
         prevent_initial_call=True,
     )
-    def gas_init_callback(use_class, serial, model, contents, filename):
-        warn, show = read_gas_init_input(use_class, serial, model, contents, filename)
+    def gas_init_callback(use_class, serial, model, name, contents, filename):
+        warn, show = read_gas_init_input(
+            use_class, serial, model, name, contents, filename
+        )
         return warn, show
 
     @app.callback(
@@ -465,8 +392,6 @@ def register_callbacks(
     def generate_buttons(_):
         logger.info("Generating buttons")
         options = [{"label": chamber, "value": chamber} for chamber in chambers]
-        # all = {"label": "All", "value": "all"}
-        # options.insert(0, all)
         logger.debug(options)
         return dcc.Checklist(
             id="chamber-select",
@@ -647,20 +572,9 @@ def register_callbacks(
         Input("next-button", "n_clicks"),
         Input("skip-invalid", "value"),
         Input("skip-valid", "value"),
-        # Input("del-lagtime", "n_clicks"),
-        # Input("push-all", "n_clicks"),
-        # Input("push-single", "n_clicks"),
         Input("chamber-select", "value"),
         State("stored-index", "data"),
         State("stored-chamber", "data"),
-        # Input("mark-invalid", "n_clicks"),
-        # Input("mark-valid", "n_clicks"),
-        # Input("reset-cycle", "n_clicks"),
-        # Input("reset-index", "n_clicks"),
-        # Input("max-r", "n_clicks"),
-        # Input("run-init", "n_clicks"),
-        # Input("add-time", "n_clicks"),
-        # Input("substract-time", "n_clicks"),
         Input("parse-range", "n_clicks"),
         Input("used-instrument-select", "value"),
         prevent_initial_call=True,

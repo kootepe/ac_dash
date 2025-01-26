@@ -169,12 +169,9 @@ def load_config():
     filepath = os.path.abspath(os.path.dirname(__file__))
     with open(f"{filepath}/config/config.json", "r") as f:
         defaults = json.load(f)
-    print(defaults)
     with open(f"{filepath}/config/custom.json", "r") as f:
         custom = json.load(f)
-    print(custom)
     config = {**defaults, **custom}
-    print(config)
     return (
         config["chambers"],
         config["chamber_map"],
@@ -280,23 +277,14 @@ def handle_triggers(args, all_chambers, graph_names):
         next_clicks,
         skip_invalid,
         skip_valid,
-        # del_lagtime,
-        # push_all,
-        # push_one,
         selected_chambers,
         index,
         chamber,
-        # mark_invalid,
-        # mark_valid,
-        # reset_cycle,
-        # reset_index,
-        # max_r,
-        # run_init,
-        # add_time,
-        # substract_time,
         parse_range,
         selected_instrument,
     ) = args
+    if selected_instrument is None:
+        return None, None, None, None, None, None
     logger.info(selected_instrument)
     start_date = pd.to_datetime(date_range.get("start_date"))
     end_date = pd.to_datetime(date_range.get("end_date"))
@@ -307,7 +295,6 @@ def handle_triggers(args, all_chambers, graph_names):
     logger.info(f"Triggered key: {ctx.triggered_id}")
     logger.debug(f"Start date: {start_date}.")
     selected_chambers = selected_chambers or all_chambers
-    print(buttons)
 
     skips = None
     if skip_invalid:
@@ -323,7 +310,7 @@ def handle_triggers(args, all_chambers, graph_names):
         triggered_elem = ctx.triggered_id if ctx.triggered else None
 
     selected_instrument = json.loads(selected_instrument)
-    serial = selected_instrument["data"]["serial"]
+    serial = selected_instrument["serial"]
 
     if triggered_elem == "parse-range" or triggered_elem == "used-instrument-select":
         point_data = flux_range_to_df(
@@ -762,7 +749,6 @@ def parse_cycle_to_db(start, end, ifdb_dict, chamber_map):
         df["state"] = df["state"].astype(int)
         # telegraf pushes chamber ids with spaces
         df["id"] = df["id"].str.strip().astype(int)
-        # print(df["id"])
         df["id"] = df["id"].map(chamber_map)
         # create list of dataframes where each dataframe only has cycles from
         # one chamber

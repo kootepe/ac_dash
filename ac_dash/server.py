@@ -21,7 +21,9 @@ from .data_mgt import (
     mk_gas_table,
     mk_cycle_table,
     mk_volume_table,
+    mk_instrument_table,
     apply_volume_table_trigger,
+    init_instruments,
 )
 
 from .temp_users import users as init_users
@@ -47,7 +49,10 @@ mk_flux_table()
 mk_gas_table()
 mk_cycle_table()
 mk_volume_table()
+mk_instrument_table()
 apply_volume_table_trigger()
+
+init_instruments()
 
 for user in init_users:
     add_user(user["username"], user["password"], user["email"], user["role"])

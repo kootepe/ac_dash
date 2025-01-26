@@ -32,10 +32,6 @@ def mk_ac_plot(flask_app=None, url="/ac_dash/"):
     init_logger()
     # Load configuration and cycles
     (chambers, chamber_map, layout_json, _) = load_config()
-    # s = pdto_datetime("2024-11-12T00:00:00Z")
-    # e = pd.to_datetime("2024-11-15T00:00:00Z")
-    # parse_cycle_to_db(s, e, ifdb_read_dict, chamber_map)
-    # cycle_to_local_db(ifdb_read_dict, chamber_map)
     # Set up layout
     app.layout, main_page, settings_page, graph_names = create_layout(layout_json, url)
 

@@ -13,6 +13,8 @@ from .data_mgt import (
     df_to_meteo_table,
     cycle_table_to_df,
     flux_table_to_df,
+    check_existing_instrument,
+    add_instrument,
 )
 from .utils import (
     process_measurement_file,
@@ -25,10 +27,13 @@ from .utils import (
 logger = logging.getLogger("defaultLogger")
 
 
-def read_gas_init_input(use_class, serial, model, contents, filename):
+def read_gas_init_input(use_class, serial, model, name, contents, filename):
     """Read data passed from the settings page"""
     if serial is None or model is None:
         return "Select instrument or fill in instrument details", ""
+    if not check_existing_instrument(serial, model, use_class):
+        add_instrument(model, serial, use_class, name)
+
     content_type, content_str = contents.split(",")
     ext = filename.split(".")[-1].lower()
     decoded = base64.b64decode(content_str)
@@ -171,10 +176,6 @@ def init_flux(init, start, end, instrument, meteo):
         pd.to_datetime(end, format="%Y-%m-%d", errors="raise")
     except Exception:
         return "give YYYY-MM-DD date"
-    print(start)
-    print(end)
-    print(instrument)
-    print(meteo)
     logger.info("Initiating")
     fluxes = flux_table_to_df()
     dupes = set(fluxes["start_time"])
