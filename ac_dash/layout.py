@@ -359,6 +359,16 @@ def create_layout(layout_json, url):
                 href=f"{url}db_view",
                 style={"padding-right": "15px"},
             ),
+            dcc.Link(
+                "Change password",
+                href=f"{url}changepw",
+                style={"padding-right": "15px"},
+            ),
+            dcc.Link(
+                "Go to db view",
+                href=f"{url}db_view",
+                style={"padding-right": "15px"},
+            ),
             html.Div(logout),
             html.Div(id="page-content"),
         ]

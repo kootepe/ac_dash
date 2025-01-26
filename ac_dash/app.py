@@ -10,6 +10,7 @@ from ac_dash.data_mgt import flux_table_to_df
 from ac_dash.views.login import mk_login_page
 from ac_dash.views.success import mk_success
 from ac_dash.views.logout import mk_logout_page
+from ac_dash.views.change_pw import mk_change_pw
 from ac_dash.api.routes import register_api
 
 from ac_dash.server import server, User, login_manager, api
@@ -28,6 +29,7 @@ mk_ac_plot(server, ac_plot_route)
 login = mk_login_page(server, "/login/", User)
 logout = mk_logout_page(server, "/logout/")
 success = mk_success(server, "/success/")
+mk_change_pw(server, "/changepw/")
 
 
 @login_manager.user_loader

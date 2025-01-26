@@ -1,8 +1,10 @@
 from sqlalchemy import Table, text
 from sqlalchemy.sql import select
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from ..db import engine
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 db = SQLAlchemy()
 
@@ -68,3 +70,53 @@ def show_users():
         print(row)
 
     conn.close()
+
+
+def change_user_password(username, current_password, new_password):
+    """
+    Change the user's password in the database.
+
+    Parameters
+    ----------
+    engine : sqlalchemy.Engine
+        The SQLAlchemy database engine.
+
+    username : str
+        The username of the user.
+
+    current_password : str
+        The user's current password.
+
+    new_password : str
+        The new password to set.
+
+    Returns
+    -------
+    dict
+        A dictionary containing 'success' (bool) and 'message' (str).
+    """
+
+    # Create a session
+    with Session(engine) as session:
+        try:
+            # Query the user from the database
+            user = session.query(User).filter_by(username=username).first()
+
+            if user is None:
+                return {"success": False, "message": "User not found."}
+
+            # Verify the current password
+            if not check_password_hash(user.password, current_password):
+                return {"success": False, "message": "Current password is incorrect."}
+
+            # Hash the new password
+            hashed_password = generate_password_hash(new_password)
+
+            # Update the user's password in the database
+            user.password = hashed_password
+            session.commit()  # Commit the transaction
+
+            return {"success": True, "message": "Password changed successfully."}
+        except SQLAlchemyError as e:
+            session.rollback()  # Roll back the transaction in case of an error
+            return {"success": False, "message": f"An error occurred: {str(e)}"}

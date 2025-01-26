@@ -1,6 +1,9 @@
 import logging
 import json
+import re
 import pandas as pd
+from flask import session
+from flask_login import current_user
 from dash import (
     dcc,
     Output,
@@ -13,6 +16,7 @@ from dash import (
     ALL,
 )
 
+from .users_mgt.users_mgt import change_user_password
 
 from .utils import (
     handle_triggers,
@@ -44,6 +48,8 @@ from .data_init import (
     read_volume_init_input,
     init_flux,
 )
+
+from .views.change_pw import mk_change_pw
 
 cycle_tbl_cols = [col.name for col in Cycle_tbl.columns]
 
@@ -113,6 +119,46 @@ def register_callbacks(
         ],
         # *[Input(elem, "id") for key, elem in settings["settings"]["keybinds"].items()],
     )
+
+    # Callback for handling password change
+    @app.callback(
+        Output("change-password-output", "children"),
+        Input("change-password-btn", "n_clicks"),
+        State("current-password", "value"),
+        State("new-password", "value"),
+        State("confirm-password", "value"),
+    )
+    def change_password(n_clicks, current_password, new_password, confirm_password):
+        if n_clicks > 0:
+            # Validate input
+            if not current_password or not new_password or not confirm_password:
+                return "All fields are required."
+
+            if new_password != confirm_password:
+                return "New password and confirmation do not match."
+
+            # Password strength validation (optional)
+            if (
+                len(new_password) < 8
+                # or not re.search(r"\d", new_password)
+                # or not re.search(r"[A-Z]", new_password)
+            ):
+                return "Password must be at least 8 characters long, include a number and an uppercase letter."
+
+            # Simulate username from the current user session (replace this with actual session handling)
+            username = current_user.username
+
+            # Call the mock function to update the password in the database
+            response = change_user_password(username, current_password, new_password)
+
+            if response["success"]:
+                return html.Div(
+                    "Password changed successfully!", style={"color": "green"}
+                )
+            else:
+                return f"Failed to change password. {response['message']}"
+
+        return ""
 
     @app.callback(
         Output("model-input-div", "style"),
@@ -371,6 +417,11 @@ def register_callbacks(
             logger.info("Making db view")
             logger.info(flux_col_store)
             page = mk_db_view_page(flux_col_store)
+            return page
+        if pathname == f"{url}changepw":
+            # username = current_user.username
+            logger.info("Making change pw view")
+            page = mk_change_pw(username=current_user.username).layout
             return page
         else:
             page, _, _ = mk_main_page(

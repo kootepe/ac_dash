@@ -65,10 +65,15 @@ def mk_login_page(flask_app, url):
             try:
                 # Make a POST request to the Flask login route
                 user = User.query.filter_by(username=username).first()
+
+                if user is None:
+                    return no_update, "Wrong username or password"
+
                 if check_password_hash(user.password, password):
                     login_user(user)
                     session["logged_in"] = True
                     return "/", ""
+
                 else:
                     return no_update, "Wrong username or password"
             except Exception:

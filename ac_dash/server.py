@@ -54,8 +54,6 @@ apply_volume_table_trigger()
 
 init_instruments()
 
-for user in init_users:
-    add_user(user["username"], user["password"], user["email"], user["role"])
 
 # initiate login manager
 server.config["SECRET_KEY"] = "my_secret_key"
