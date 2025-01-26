@@ -737,6 +737,27 @@ def del_volume_measurement(time, id):
         con.execute(to_delete)
 
 
+class Instruments(db.Model):
+    __tablename__ = "instrument_table"
+    serial = db.Column(db.String, primary_key=True)
+    model = db.Column(db.String)
+    use_class = db.Column(db.String)
+
+
+Instrument_tbl = Table("instrument_table", Instruments.metadata)
+
+
+def mk_instrument_table():
+    Instruments.metadata.create_all(engine)
+
+
+def instruments_to_df():
+    select_st = select(text("SELECT * FROM instrument_table;"))
+    with engine.connect() as conn:
+        df = pd.read_sql(select_st, conn)
+    return df
+
+
 def get_primary_keys(table_name, engine):
     """
     Retrieve the primary key columns of a SQL table.
