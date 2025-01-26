@@ -117,8 +117,8 @@ class GasApi(Resource):
         if file_length < 10:
             return {"message": f"No data in file {file.filename}"}, 400
 
-        instrument = request.form.get("instrument", None)
-        serial = request.form.get("serial", None)
+        instrument = request.form.get("instrument_model", None)
+        serial = request.form.get("instrument_serial", None)
 
         # try and read the first two rows of the file for model and serial
         if not instrument or not serial:
@@ -136,9 +136,9 @@ class GasApi(Resource):
 
         # BUG: this doesnt fail gracefully
         if instrument is None:
-            return {"message": "Provide instrument"}, 400
+            return {"message": "Provide instrument_model"}, 400
         if serial is None:
-            return {"message": "Provide instrument serial"}, 400
+            return {"message": "Provide instrument_serial"}, 400
 
         instrument_class = instrument.replace("-", "")
         file_reader = instruments.get(instrument_class, None)
