@@ -1,6 +1,9 @@
 # Flask application for validating static chamber measurements.
 
 Proper implementation which uses this repo as a submodule:
+```
+https://github.com/kootepe/ac_dash_app
+```
 
 ## Running the app.
 
