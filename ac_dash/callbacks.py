@@ -163,7 +163,9 @@ def register_callbacks(
         return ""
 
     @app.callback(
-        Output("dl-all", "data"), Input("dl-all", "n_clicks"), prevent_initial_call=True
+        Output("dl-all", "data"),
+        Input("dl-all", "n_clicks"),
+        prevent_initial_call=True,
     )
     def download_fluxes(dl_all):
         date = dt.today().strftime("%Y_%m_%d")
