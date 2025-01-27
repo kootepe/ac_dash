@@ -181,7 +181,6 @@ def flux_table_to_df(cols=None):
     with engine.connect() as conn:
         df = pd.read_sql(select_st, conn)
 
-    df.sort_values("start_time", inplace=True)
     return df
 
 
