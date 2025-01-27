@@ -177,6 +177,8 @@ def register_callbacks(
                 csv_buffer.getvalue().encode(),
                 filename=f"{date}_calculated_fluxes.csv",
             )
+        else:
+            return no_update
 
     @app.callback(
         Output("model-input-div", "style"),
