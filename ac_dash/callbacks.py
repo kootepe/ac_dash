@@ -164,7 +164,7 @@ def register_callbacks(
 
     @app.callback(
         Output("dl-all", "data"),
-        Input("dl-all", "n_clicks"),
+        Input("dl-all-button", "n_clicks"),
         prevent_initial_call=True,
     )
     def download_fluxes(n_clicks):
