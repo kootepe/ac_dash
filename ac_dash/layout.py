@@ -131,14 +131,6 @@ def mk_main_page(left_settings, right_settings, settings):
                 children=[
                     html.Div(
                         [
-                            html.Button(
-                                "Download calculated fluxes", id="dl-all-button"
-                            ),
-                            dcc.Download(id="dl-all"),
-                        ]
-                    ),
-                    html.Div(
-                        [
                             html.Button("Previous", id="prev-button", n_clicks=0),
                             html.Button("Next", id="next-button", n_clicks=0),
                         ],
@@ -305,6 +297,13 @@ def mk_settings_page(settings_elems, settings_json):
     page = html.Div(
         [
             html.H1("Settings Page"),
+            html.Div(
+                [
+                    html.Button("Download calculated fluxes", id="dl-all-button"),
+                    dcc.Download(id="dl-all"),
+                ],
+                style={"padding-bottom": "20px"},
+            ),
             dcc.Tabs(
                 [
                     dcc.Tab(
