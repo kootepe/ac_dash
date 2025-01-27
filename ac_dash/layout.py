@@ -131,6 +131,14 @@ def mk_main_page(left_settings, right_settings, settings):
                 children=[
                     html.Div(
                         [
+                            html.Button(
+                                "Download calculated fluxes", id="dl-all-button"
+                            ),
+                            dcc.Download(id="dl-all"),
+                        ]
+                    ),
+                    html.Div(
+                        [
                             html.Button("Previous", id="prev-button", n_clicks=0),
                             html.Button("Next", id="next-button", n_clicks=0),
                         ],

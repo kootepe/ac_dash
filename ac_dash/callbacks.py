@@ -1,9 +1,11 @@
 import logging
 import json
 import re
+import io
 import pandas as pd
 from flask import session
 from flask_login import current_user
+from datetime import datetime as dt
 from dash import (
     dcc,
     Output,
@@ -159,6 +161,21 @@ def register_callbacks(
                 return f"Failed to change password. {response['message']}"
 
         return ""
+
+    @app.callback(
+        Output("dl-all", "data"), Input("dl-all", "n_clicks"), prevent_initial_call=True
+    )
+    def download_fluxes(dl_all):
+        date = dt.today().strftime("%Y_%m_%d")
+        data = flux_table_to_df()
+        csv = data.to_csv(index=False)
+        csv_buffer = io.StringIO(csv)
+        return dcc.send_bytes(
+            csv_buffer.getvalue().encode(),
+            filename=f"{date}_calculated_fluxes.csv",
+        )
+
+        pass
 
     @app.callback(
         Output("model-input-div", "style"),
