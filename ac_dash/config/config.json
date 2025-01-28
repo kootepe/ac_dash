@@ -42,17 +42,16 @@
         "multi": 1,
         "opts": [
           "lagtime",
-          "r_std",
           "quality_r2",
-          "CO2_flux",
           "CH4_flux",
-          "N2O_flux",
-          "CO2_r2",
-          "CH4_r2",
-          "N2O_r2",
-          "CO2_r",
           "CH4_r",
-          "N2O_r"
+          "CH4_r2",
+          "CO2_flux",
+          "CO2_r",
+          "CO2_r2",
+          "N2O_flux",
+          "N2O_r",
+          "N2O_r2"
         ],
         "value": [
           "lagtime",
@@ -69,16 +68,10 @@
       },
       "layout_buttons": {
         "max-r": {
-          "text": "Guess lagtime"
-        },
-        "push-single": {
-          "text": "Push current measurement"
+          "text": "Reset measurement"
         },
         "toggle-valid": {
           "text": "Toggle valid"
-        },
-        "reset-index": {
-          "text": "Jump to beginning"
         },
         "add-time": {
           "text": "Add 2min"
