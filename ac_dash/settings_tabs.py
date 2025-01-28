@@ -331,7 +331,7 @@ def mk_init_tabs():
                                     },
                                 ),
                                 dcc.Tab(
-                                    label="Upload volume data -- not implemented yet",
+                                    label="Upload volume data",
                                     children=[
                                         html.Div(
                                             [
