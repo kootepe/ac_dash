@@ -1,5 +1,6 @@
 import time
 from plotly.graph_objs import Scattergl
+from numpy import isnan
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
@@ -626,6 +627,8 @@ class MeasurementCycle:
                 self.quality_r = calculate_pearsons_r(
                     new_data.index.view(int), new_data[gas]
                 )
+                if isnan(self.quality_r):
+                    self.quality_r = 1
                 self.quality_r2 = self.quality_r**2
         if self.has_errors:
             flux = 0
