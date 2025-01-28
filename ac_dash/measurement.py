@@ -264,7 +264,7 @@ class MeasurementCycle:
     @air_temperature.setter
     def air_temperature(self, value):
         if value is None:
-            self._air_temperature = 1000
+            self._air_temperature = 10
             self.default_temperature = True
             return
 
