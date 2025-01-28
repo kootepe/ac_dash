@@ -48,10 +48,15 @@ def calculate_gas_flux(measurement, gas, slope, height):
     # universal gas constant
     r = 8.314
     # convert slope from ppX/s to ppm/hour
-    slope = (slope / conv) * 60 * 60
+    slope_ppmh = (slope / conv) * 60 * 60
 
     # flux in mg/m2/h
-    flux = slope / 1000000 * h * ((m * p) / (r * t)) * 1000
+    flux = slope_ppmh / 1000000 * h * ((m * p) / (r * t)) * 1000
+    # flux = (
+    #     slope
+    #     * (height / (22.4 * 10**-3 * (273.15 / (273.15 - measurement.air_temperature))))
+    #     * 1
+    # )
 
     return flux
 
