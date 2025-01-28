@@ -25,13 +25,17 @@ _, _, settings, _ = load_config()
 
 def mk_init_tabs():
     distinct_source = get_distinct_meteo_source()
+    logger.debug(distinct_source)
 
     distinct_source = [
         {
             "label": f"{item}",
-            "value": json.dumps({item: item}),
+            "value": json.dumps({"source": item}),
         }
         for item in distinct_source
+    ]
+    distinct_source_with_init = distinct_source + [
+        {"label": "New source", "value": json.dumps({"source": "new"})}
     ]
 
     db_instruments = get_instrument_rows_as_dicts()
@@ -261,23 +265,44 @@ def mk_init_tabs():
                                                     },
                                                 ),
                                                 dcc.Dropdown(
-                                                    options=[
-                                                        {
-                                                            "label": "Oulanka fen",
-                                                            "value": "oulanka_fen",
-                                                        },
-                                                        {
-                                                            "label": "Oulanka pineforest",
-                                                            "value": "oulanka_pineforest",
-                                                        },
-                                                        {
-                                                            "label": "Oulanka genreal",
-                                                            "value": "oulanka_general",
-                                                        },
-                                                    ],
+                                                    options=distinct_source_with_init,
+                                                    # options=[
+                                                    #     {
+                                                    #         "label": "Oulanka fen",
+                                                    #         "value": "oulanka_fen",
+                                                    #     },
+                                                    #     {
+                                                    #         "label": "Oulanka pineforest",
+                                                    #         "value": "oulanka_pineforest",
+                                                    #     },
+                                                    #     {
+                                                    #         "label": "Oulanka genreal",
+                                                    #         "value": "oulanka_general",
+                                                    #     },
+                                                    # ],
                                                     multi=False,
                                                     id="meteo-source-input",
-                                                    style={"width": "20vw"},
+                                                    style={
+                                                        "width": "20vw",
+                                                    },
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        html.Label("Source name"),
+                                                        dcc.Input(
+                                                            # "New meteo source",
+                                                            id="meteo-source-name",
+                                                            disabled=True,
+                                                            style={
+                                                                "width": "20vw",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    id="meteo-new-source-div",
+                                                    style={
+                                                        "display": "none",
+                                                        "width": "20vw",
+                                                    },
                                                 ),
                                                 dcc.Upload(
                                                     id="upload-meteo",
@@ -378,9 +403,12 @@ def mk_init_tabs():
                                             dcc.Input(
                                                 placeholder="Start date",
                                                 id="init-start",
+                                                style={"width": "20vw"},
                                             ),
                                             dcc.Input(
-                                                placeholder="End date", id="init-end"
+                                                placeholder="End date",
+                                                id="init-end",
+                                                style={"width": "20vw"},
                                             ),
                                             html.Button("Calculate", id="init-flux"),
                                         ],

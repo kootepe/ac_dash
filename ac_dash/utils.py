@@ -144,7 +144,7 @@ def process_measurement_zip(file_path, instrument):
         in_rows = 0
         push_rows = 0
         for file_name in file_list:
-            file_exts = ("csv", "DATA", "DAT")
+            file_exts = ("csv", "data", "dat")
             if file_name.endswith(file_exts):
                 print(f"Processing: {file_name}")
 

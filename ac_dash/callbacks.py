@@ -246,6 +246,7 @@ def register_callbacks(
 
         # Default behavior when no value is selected
         if value is None:
+            serial_style["display"] = "none"
             return create_return(
                 serial_style, "", False, "", serial_style, False, "", ""
             )
@@ -306,14 +307,32 @@ def register_callbacks(
     @app.callback(
         Output("meteo-input-warn", "children"),
         Output("meteo-input-show", "children"),
-        State("meteo-source-input", "value"),
+        Output("meteo-new-source-div", "style"),
+        Output("meteo-source-name", "disabled"),
+        Output("meteo-source-name", "value"),
+        Input("meteo-source-input", "value"),
+        State("meteo-source-name", "value"),
         Input("upload-meteo", "contents"),
         State("upload-meteo", "filename"),
         prevent_initial_call=True,
     )
-    def meteo_init_callback(source, contents, filename):
-        warn, show = read_meteo_init_input(source, contents, filename)
-        return warn, show
+    def meteo_init_callback(source, sourcename, contents, filename):
+        print(source)
+        if source is None:
+            return "", "", {"display": "none"}, True, None
+        source = json.loads(source)
+        source = source["source"]
+        print(ctx.triggered_id)
+        if ctx.triggered_id == "meteo-source-input":
+            if source is None:
+                return "", "", {"display": "none"}, True, None
+            if source == "new":
+                return "", "", {"display": "block", "width": "20vw"}, False, ""
+            if source != "new":
+                return ("", "", {"display": "block", "width": "20vw"}, True, source)
+
+        warn, show = read_meteo_init_input(sourcename, contents, filename)
+        return warn, show, no_update, no_update, sourcename
 
     @app.callback(
         Output("volume-input-warn", "children"),
@@ -346,8 +365,8 @@ def register_callbacks(
         if end is None:
             return "Give end date"
         try:
-            pd.to_datetime(start, format="%Y-%m-%d")
-            pd.to_datetime(end, format="%Y-%m-%d")
+            pd.to_datetime(start, format="ISO8601")
+            pd.to_datetime(end, format="ISO8601")
         except Exception:
             return "give YYYY-MM-DD date"
         warn = init_flux(init, start, end, instrument, meteo)

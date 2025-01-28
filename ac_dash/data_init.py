@@ -62,6 +62,7 @@ def read_gas_init_input(use_class, serial, model, name, contents, filename):
             return "", f"Pushed {push_rows}/{in_rows}"
 
         if ext == "zip":
+            print("process zip")
             push_rows, in_rows = process_measurement_zip(
                 io.BytesIO(decoded), instrument
             )
@@ -168,19 +169,20 @@ def read_meteo_init_input(source, contents, filename):
 
 
 def init_flux(init, start, end, instrument, meteo):
-    if instrument is None:
-        return "Select used instrument"
-    if meteo is None:
-        return "Select meteo source"
-    if start is None:
-        return "Give start date"
-    if end is None:
-        return "Give end date"
-    try:
-        pd.to_datetime(start, format="%Y-%m-%d", errors="raise")
-        pd.to_datetime(end, format="%Y-%m-%d", errors="raise")
-    except Exception:
-        return "give YYYY-MM-DD date"
+    # if instrument is None:
+    #     return "Select used instrument"
+    # if meteo is None:
+    #     return "Select meteo source"
+    # if start is None:
+    #     return "Give start date"
+    # if end is None:
+    #     return "Give end date"
+    # try:
+    #     pd.to_datetime(start, format="%Y-%m-%d %H:%M", errors="raise")
+    #     pd.to_datetime(end, format="%Y-%m-%d %H:%M", errors="raise")
+    # except Exception as e:
+    #     return f"{e}"
+    #     # return "give YYYY-MM-DD date"
     logger.info("Initiating")
     fluxes = flux_table_to_df()
     dupes = set(fluxes["start_time"])
