@@ -37,14 +37,15 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 def register_api(api):
-    api.add_resource(FluxApi, "/api/fluxes")
-    api.add_resource(CycleApi, "/api/cycle_api")
-    api.add_resource(GasApi, "/api/gas_api")
-    api.add_resource(MeteoApi, "/api/meteo_api")
-    api.add_resource(InitFluxApi, "/api/init_api")
+    api.add_resource(FluxApi, "/api/fluxes", "/api/fluxes/")
+    api.add_resource(CycleApi, "/api/cycle_api", "/api/cycle_api/")
+    api.add_resource(GasApi, "/api/gas_api", "/api/gas_api/")
+    api.add_resource(MeteoApi, "/api/meteo_api", "/api/meteo_api/")
+    api.add_resource(InitFluxApi, "/api/init_api", "/api/init_api/")
 
 
 @auth_bp.route("/login/", methods=["POST"])
+@auth_bp.route("/login", methods=["POST"])
 def login_route():
     data = request.json
     username = data.get("username")
