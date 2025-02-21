@@ -207,7 +207,9 @@ def generate_measurements(month, cycles):
     return all_measurements
 
 
-def init_from_cycle_table(cycle_df, use_class=None, serial=None, conn=None):
+def init_from_cycle_table(
+    cycle_df, use_class=None, serial=None, conn=None, meteo_source=None
+):
     instrument = instruments.get(use_class)(serial)
     all_measurements = []
     o = 0
@@ -219,7 +221,16 @@ def init_from_cycle_table(cycle_df, use_class=None, serial=None, conn=None):
         end = row.end_offset
         id = row.chamber_id
         logger.info(f"Initiating {start}")
-        m = MeasurementCycle(id, start, close, open, end, instrument, conn=conn)
+        m = MeasurementCycle(
+            id,
+            start,
+            close,
+            open,
+            end,
+            instrument,
+            meteo_source=meteo_source,
+            conn=conn,
+        )
         if m.data is not None and not m.data.empty:
             # single_flux_to_table(m.attribute_df)
             all_measurements.append(m.attribute_df)

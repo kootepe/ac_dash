@@ -282,7 +282,7 @@ class InitFluxApi(Resource):
 
     @login_required
     def post(self):
-        def generate(df):
+        def generate(df, model, serial, meteo):
             chunk_size = 10  # Number of rows to process per chunk
             total_len = len(df)
 
@@ -293,7 +293,9 @@ class InitFluxApi(Resource):
                 # Process the chunk
                 start = chunk_df["start_time"].iloc[0]
                 end = chunk_df["start_time"].iloc[0]
-                init_from_cycle_table(chunk_df, None, None)
+                init_from_cycle_table(
+                    chunk_df, use_class=model, serial=serial, meteo_source=meteo
+                )
 
                 # Yield progress update
                 yield f"Step {min(start_idx + chunk_size, total_len)}/{total_len} completed between {start} - {end}\n"
@@ -302,6 +304,7 @@ class InitFluxApi(Resource):
         start = json.get("start", None)
         end = json.get("end", None)
         serial = json.get("instrument_serial", None)
+        model = json.get("instrument_model", None).replace("-", "")
         meteo = json.get("meteo_source", None)
         instruments = get_distinct_instrument()
         sources = get_distinct_meteo_source()
@@ -353,7 +356,9 @@ class InitFluxApi(Resource):
                 }, 200
             df.sort_values("start_time", inplace=True)
             logger.debug(df)
-        return Response(generate(df), content_type="text/plain")
+        return Response(
+            generate(df, model, serial, meteo), content_type="text/plain"
+        )
 
 
 class MeteoApi(Resource):
