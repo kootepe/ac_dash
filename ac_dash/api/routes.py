@@ -337,9 +337,11 @@ class InitFluxApi(Resource):
         except Exception:
             return {"message": "Give end date in proper format"}
 
+        logger.debug("Getting fluxes")
         fluxes = flux_table_to_df()
         dupes = set(fluxes["start_time"])
         with engine.connect() as conn:
+            logger.debug("Getting cycles")
             df = cycle_table_to_df(start, end, conn)
             if df.empty or df is None:
                 return {"message": f"No cycles between {start} and {end}."}, 200
