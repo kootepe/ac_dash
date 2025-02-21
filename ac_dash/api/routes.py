@@ -2,7 +2,15 @@ import os
 import pandas as pd
 import csv
 import logging
-from flask import redirect, request, jsonify, session, url_for, Response, Blueprint
+from flask import (
+    redirect,
+    request,
+    jsonify,
+    session,
+    url_for,
+    Response,
+    Blueprint,
+)
 from flask_restful import Resource
 from flask_login import login_required, login_user
 from ..server import User, login_manager, server
@@ -58,7 +66,9 @@ def login_route():
     if check_password_hash(user.password, password):
         login_user(user)
         session["logged_in"] = True
-        return jsonify({"message": "Logged in successfully", "success": True}), 200
+        return jsonify(
+            {"message": "Logged in successfully", "success": True}
+        ), 200
     else:
         return jsonify({"error": "Invalid credentials", "success": False}), 401
     return redirect("/login/")
@@ -222,7 +232,9 @@ class CycleApi(Resource):
         try:
             if "csv" in file.filename:
                 df = pd.read_csv(file)
-                df["start_time"] = pd.to_datetime(df["start_time"], format="ISO8601")
+                df["start_time"] = pd.to_datetime(
+                    df["start_time"], format="ISO8601"
+                )
                 df["start_time"] = (
                     df["start_time"]
                     .dt.tz_localize("Europe/Helsinki", ambiguous=True)
@@ -303,7 +315,9 @@ class InitFluxApi(Resource):
             }
 
         if meteo is None:
-            return {"message": f"No meteo_source given, options: {', '.join(sources)}"}
+            return {
+                "message": f"No meteo_source given, options: {', '.join(sources)}"
+            }
         if meteo not in sources:
             return {
                 "message": f"Meteo source {meteo} doesn't have associated meteo measurements."
@@ -392,8 +406,9 @@ class MeteoApi(Resource):
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     # Check if the request is from an API (Accept: application/json or path)
-    if request.accept_mimetypes.best == "application/json" or request.path.startswith(
-        "/api/"
+    if (
+        request.accept_mimetypes.best == "application/json"
+        or request.path.startswith("/api/")
     ):
         response = jsonify({"message": "Unauthorized access. Please log in."})
         response.status_code = 401
