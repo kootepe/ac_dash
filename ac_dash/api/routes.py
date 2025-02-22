@@ -361,9 +361,8 @@ class InitFluxApi(Resource):
             df.sort_values("start_time", inplace=True)
             logger.debug(df)
         return Response(
-            stream_with_context(
-                generate(df, model, serial, meteo), content_type="text/plain"
-            )
+            stream_with_context(generate(df, model, serial, meteo)),
+            content_type="text/plain",
         )
 
 
