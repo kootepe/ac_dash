@@ -10,6 +10,7 @@ from flask import (
     url_for,
     Response,
     Blueprint,
+    stream_with_context,
 )
 from flask_restful import Resource
 from flask_login import login_required, login_user
@@ -304,10 +305,12 @@ class InitFluxApi(Resource):
         start = json.get("start", None)
         end = json.get("end", None)
         serial = json.get("instrument_serial", None)
-        model = json.get("instrument_model", None).replace("-", "")
+        model = json.get("instrument_model", None)
         meteo = json.get("meteo_source", None)
         instruments = get_distinct_instrument()
         sources = get_distinct_meteo_source()
+        if model is None:
+            return {"message": "No instrument_model given"}
         if serial is None:
             return {
                 "message": f"No instrument_serial given, options: {', '.join(instruments)}"
@@ -326,6 +329,7 @@ class InitFluxApi(Resource):
                 "message": f"Meteo source {meteo} doesn't have associated meteo measurements."
             }
 
+        model = model.replace("-", "")
         if start is None:
             return {"message": "No start date given."}
         if end is None:
@@ -357,7 +361,9 @@ class InitFluxApi(Resource):
             df.sort_values("start_time", inplace=True)
             logger.debug(df)
         return Response(
-            generate(df, model, serial, meteo), content_type="text/plain"
+            stream_with_context(
+                generate(df, model, serial, meteo), content_type="text/plain"
+            )
         )
 
 
