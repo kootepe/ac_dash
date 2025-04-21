@@ -1,5 +1,5 @@
 from dash import Dash
-from .layout import create_layout
+from .layout import main_layout
 from .callbacks import register_callbacks
 import logging
 
@@ -37,7 +37,7 @@ def mk_ac_depth(flask_app, url):
         return send_from_directory(HERE, "kammiot.png")
 
     chamber_blocks, _, _, measurement_spots = load_config()
-    app.layout = create_layout(chamber_blocks, measurement_spots)
+    app.layout = main_layout(chamber_blocks, measurement_spots)
     register_callbacks(app, chamber_blocks, measurement_spots)
 
     protect_dash_app(flask_app, app)

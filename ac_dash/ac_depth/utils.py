@@ -1,3 +1,6 @@
+import pandas as pd
+from sqlalchemy import select
+from ..db import engine
 import os
 import json
 import pytz
@@ -8,6 +11,7 @@ from dash import html
 
 from ..common_utils.utils import mk_uuid
 from ..common_utils.influxdb_helper import IfdbPoint, init_client
+from ..data_mgt import Volume_tbl  # Assuming this is your SQLAlchemy model
 
 LOCAL_TZ = pytz.timezone("Europe/Helsinki")
 CONTAINER_TZ = pytz.timezone("UTC")
@@ -61,7 +65,9 @@ def show_old_measurements(pts, role):
 
 
 class IfdbDepthPoint(IfdbPoint):
-    def __init__(self, time, id, nw, sw, ne, se, mid, has_snow, unit, uuid=None):
+    def __init__(
+        self, time, id, nw, sw, ne, se, mid, has_snow, unit, uuid=None
+    ):
         measurement = "ac_depth"
         calc_depth = (((nw + sw + ne + se) / 4) + mid) / 2
         if uuid is None:
@@ -216,3 +222,17 @@ def query_log_point(measurement, ifdb_dict):
     points = IfdbDepthPoint.from_influxdb_result(result)
 
     return points
+
+
+def get_volume_data(start=None, end=None):
+    if start is None:
+        start = pd.to_datetime("1970-01-01")
+    if end is None:
+        end = pd.to_datetime("2040-01-01")
+    query = select(Volume_tbl).where(
+        Volume_tbl.c.datetime >= start, Volume_tbl.c.datetime <= end
+    )
+    with engine.connect() as conn:
+        df = pd.read_sql(query, conn)
+    df.sort_values(by="datetime", inplace=True)
+    return df

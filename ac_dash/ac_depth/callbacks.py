@@ -5,11 +5,23 @@ from datetime import datetime as dt
 
 
 import logging
-from dash import Output, Input, State, ctx, ALL, html, dcc, dash_table
+from dash import (
+    Output,
+    Input,
+    State,
+    ctx,
+    ALL,
+    html,
+    dcc,
+    dash_table,
+    no_update,
+)
 from datetime import datetime as dt
 from flask_login import current_user
 
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import update
+from sqlalchemy.sql import and_
 from ..common_utils.influxdb_helper import (
     ifdb_push,
     delete_by_uuid,
@@ -25,6 +37,11 @@ from .utils import (
     query_log_point,
     show_old_measurements,
 )
+from .layout import main_layout, modify_layout
+from .utils import get_volume_data
+from ..db import engine
+
+from ..data_mgt import Volume_tbl  # Assuming this is your SQLAlchemy model
 from ..data_mgt import df_to_volume_table, del_volume_measurement
 import pandas as pd
 
@@ -43,72 +60,9 @@ height_modifier = {
 expected = ["nw", "sw", "ne", "se", "mid", "chamber_height"]
 
 
-def parse_contents(contents, filename, time, measurement_cols, unit, has_snow):
-    logger.debug("Uploaded measurements")
-    content_type, content_string = contents.split(",")
-    measurement_cols = [col.lower() for col in measurement_cols]
-
-    if has_snow is None:
-        has_snow = 0
-    else:
-        if len(has_snow) > 0:
-            has_snow = 1
-        else:
-            has_snow = 0
-    decoded = base64.b64decode(content_string)
-    if "csv" in filename or "txt" in filename:
-        df = pd.read_csv(
-            io.StringIO(decoded.decode("utf-8")), names=["measurement_id", "value"]
-        )
-        file_date = dt.strptime(f"{filename[:10]} 12:00", "%Y_%m_%d %H:%M")
-        # split first column
-        df[["chamber_id", "measurement"]] = df["measurement_id"].str.split(
-            "_", n=2, expand=True
-        )
-        # keeps these
-        df = df[["chamber_id", "measurement", "value"]]
-        df["measurement"] = df["measurement"].str.lower()
-
-        # group by chamber id
-        dfs = []
-        for gr, df in df.groupby("chamber_id"):
-            df = df.pivot_table(
-                index="chamber_id",
-                columns="measurement",
-                values="value",
-                fill_value=-9999,
-            ).reset_index()
-
-            dfs.append(df)
-        dfa = pd.concat(dfs)
-        # sort by chamber_id
-        dfa = dfa.sort_values(by="chamber_id", key=lambda col: col.astype(int))
-        dfa["datetime"] = file_date
-        dfa["has_snow"] = has_snow
-        dfa["unit"] = unit
-        dfa.fillna(-9999, inplace=True)
-
-        dfa["chamber_height"] = (
-            (dfa[["nw", "sw", "ne", "se"]].sum(axis=1) / 4) + dfa["mid"]
-        ) / 2
-        # reorder columns
-        matching_columns = [col for col in measurement_cols if col in dfa.columns]
-        extra_columns = [col for col in dfa.columns if col not in measurement_cols]
-        dfa = dfa[extra_columns + matching_columns]
-    else:
-        return html.Div(
-            ["Unsupported file format. Please upload a comma separated CSV file."]
-        )
-
-        # )
-    data = dfa.to_dict("records")
-    columns = [{"name": col, "id": col} for col in dfa.columns]
-    return data, columns
-
-
-def register_callbacks(app, chambers, in_measurements):
+def register_callbacks(app, in_chambers, in_measurements):
     # flatten list
-    chambers = [item for row in chambers for item in row]
+    chambers = [item for row in in_chambers for item in row]
 
     @app.callback(
         Output("dl-template", "data"),
@@ -260,7 +214,9 @@ def register_callbacks(app, chambers, in_measurements):
         del_button = args[4]
         measurement_inputs = args[len(in_measurements) :]
 
-        measurement_names = [measurement.lower() for measurement in in_measurements]
+        measurement_names = [
+            measurement.lower() for measurement in in_measurements
+        ]
         role = current_user.role
         # measurement = ifdb_dict.get("measurement")
         # pts = query_log_point(measurement, ifdb_dict)
@@ -345,12 +301,12 @@ def register_callbacks(app, chambers, in_measurements):
                     "datetime": [time],
                     **{meas: to_db.get(meas) for meas in measurement_names},
                     "chamber_height": [chamber_height],
-                    "height_unit": ["m"],
+                    "has_snow": has_snow,
+                    "unit": ["m"],
                 }
                 df = pd.DataFrame(data)
 
                 try:
-                    pass
                     df_to_volume_table(df)
                 except (IntegrityError, ValueError):
                     return old_pts, "DATAPOINT EXISTS IN LOCAL DB"
@@ -363,6 +319,177 @@ def register_callbacks(app, chambers, in_measurements):
 
                 return old_pts, ""
 
+    @app.callback(
+        Output("editable-data-table", "data"),
+        Output("editable-data-table", "columns"),
+        Input("btn-load-data", "n_clicks"),
+        State("edit-date-range", "start_date"),
+        State("edit-date-range", "end_date"),
+        prevent_initial_call=True,
+    )
+    def load_existing_data(n_clicks, start_date, end_date):
+        df = get_volume_data(
+            pd.to_datetime(start_date), pd.to_datetime(end_date)
+        )
+        if df.empty:
+            return [], []
+        data = df.to_dict("records")
+
+        columns = [
+            {"name": col, "id": col, "editable": True} for col in df.columns
+        ]
+
+        return data, columns
+
+    @app.callback(
+        Output("edit-response-div", "children"),
+        Input("btn-submit-edit", "n_clicks"),
+        State("editable-data-table", "data"),
+        State("editable-data-table", "selected_rows"),
+        prevent_initial_call=True,
+    )
+    def update_edited_data(n_clicks, table_data, selected_row_indices):
+        if not table_data:
+            return "No data to update."
+
+        print(table_data)
+        print(selected_row_indices)
+        df = pd.DataFrame(table_data)
+
+        if selected_row_indices is not None:
+            rows_to_delete = df.iloc[selected_row_indices]
+            for _, row in rows_to_delete.iterrows():
+                del_volume_measurement(
+                    time=pd.to_datetime(row["datetime"]),
+                    id=row["chamber_id"],
+                )
+        try:
+            with engine.begin() as conn:
+                for _, row in df.iterrows():
+                    print(row)
+                    stmt = (
+                        update(Volume_tbl)
+                        .where(
+                            and_(
+                                Volume_tbl.c.chamber_id == row["chamber_id"],
+                                Volume_tbl.c.datetime
+                                == pd.to_datetime(row["datetime"]),
+                            )
+                        )
+                        .values(
+                            {
+                                k: v
+                                for k, v in row.items()
+                                if k not in ("chamber_id", "datetime")
+                            }
+                        )
+                    )
+                    conn.execute(stmt)
+            return "Updates successfully written to the database."
+        except Exception as e:
+            return f"Error updating data: {e}"
+
+    @app.callback(
+        Output("url", "pathname", allow_duplicate=True),
+        Input("modify-measurements", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def go_to_modify(n_clicks):
+        if current_user.role == "admin":
+            return "/modify"
+        else:
+            no_update
+
+    @app.callback(
+        Output("url", "pathname", allow_duplicate=True),
+        Input("back-to-main", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def go_back(n_clicks):
+        return "/"
+
+    @app.callback(
+        Output("page-content", "children"),
+        Input("url", "pathname"),
+        prevent_initial_call=True,
+    )
+    def display_page(pathname):
+        print(pathname)
+        if pathname == "/modify":
+            return modify_layout()
+        else:
+            return main_layout(in_chambers, in_measurements)
+
 
 def height_sanity_check(heights, unit):
     pass
+
+
+def parse_contents(contents, filename, time, measurement_cols, unit, has_snow):
+    logger.debug("Uploaded measurements")
+    content_type, content_string = contents.split(",")
+    measurement_cols = [col.lower() for col in measurement_cols]
+
+    if has_snow is None:
+        has_snow = 0
+    else:
+        if len(has_snow) > 0:
+            has_snow = 1
+        else:
+            has_snow = 0
+    decoded = base64.b64decode(content_string)
+    if "csv" in filename or "txt" in filename:
+        df = pd.read_csv(
+            io.StringIO(decoded.decode("utf-8")),
+            names=["measurement_id", "value"],
+        )
+        file_date = dt.strptime(f"{filename[:10]} 12:00", "%Y_%m_%d %H:%M")
+        # split first column
+        df[["chamber_id", "measurement"]] = df["measurement_id"].str.split(
+            "_", n=2, expand=True
+        )
+        # keeps these
+        df = df[["chamber_id", "measurement", "value"]]
+        df["measurement"] = df["measurement"].str.lower()
+
+        # group by chamber id
+        dfs = []
+        for gr, df in df.groupby("chamber_id"):
+            df = df.pivot_table(
+                index="chamber_id",
+                columns="measurement",
+                values="value",
+                fill_value=-9999,
+            ).reset_index()
+
+            dfs.append(df)
+        dfa = pd.concat(dfs)
+        # sort by chamber_id
+        dfa = dfa.sort_values(by="chamber_id", key=lambda col: col.astype(int))
+        dfa["datetime"] = file_date
+        dfa["has_snow"] = has_snow
+        dfa["unit"] = unit
+        dfa.fillna(-9999, inplace=True)
+
+        dfa["chamber_height"] = (
+            (dfa[["nw", "sw", "ne", "se"]].sum(axis=1) / 4) + dfa["mid"]
+        ) / 2
+        # reorder columns
+        matching_columns = [
+            col for col in measurement_cols if col in dfa.columns
+        ]
+        extra_columns = [
+            col for col in dfa.columns if col not in measurement_cols
+        ]
+        dfa = dfa[extra_columns + matching_columns]
+    else:
+        return html.Div(
+            [
+                "Unsupported file format. Please upload a comma separated CSV file."
+            ]
+        )
+
+        # )
+    data = dfa.to_dict("records")
+    columns = [{"name": col, "id": col} for col in dfa.columns]
+    return data, columns
