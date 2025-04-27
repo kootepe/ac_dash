@@ -335,7 +335,7 @@ def main_layout(chamber_blocks, measurement_spots):
     timeinput = {"display": "inline-block", "margin": "0px"}
     return html.Div(
         [
-            dcc.Location(id="url", pathname="/modify", refresh=False),
+            dcc.Location(id="url", pathname="/", refresh=False),
             html.Div(
                 mk_main(chamber_blocks, measurement_spots), id="page-content"
             ),
